@@ -21,7 +21,7 @@
  *
  * Return value :  HEIMDALL_RET_* constant, depending of the result wanted.
  */
-int StartingConditional(string sPlayerName, int iIP, string sCDKey, int iPrivileges)
+int StartingConditional(string sPlayerName, string sIP, string sCDKey, int iPrivileges)
 {
     
     // /!\ This is a really dummy implementation, just to show how to work with that script. Don't use it as if.
@@ -38,7 +38,7 @@ int StartingConditional(string sPlayerName, int iIP, string sCDKey, int iPrivile
 
 
     // This player has asked to remain connected and has not changed ip. We connect them without bothering them.
-    if(GetLocalnt(GetModule(), sPlayerName) == iIP )
+    if(GetLocaString(GetModule(), "authenticated_" + sPlayerName) == sIP)
         return HEIMDALL_RET_OK;
 
     // Else, continue with the Connection GUI

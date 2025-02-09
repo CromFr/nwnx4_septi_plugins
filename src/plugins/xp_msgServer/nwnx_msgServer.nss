@@ -47,11 +47,8 @@ void XPMsgServer_SetConnectionSystem(int bActivated);
 //sPlayerName = "bioware account";
 void XPMsgServer_Unblock(string sPlayerName);
 
-//If you use a WelcomScreen, use it to set sPlayerName as "knowed" and so, don't print the screen for they
-void XPMsgServer_Knowed(string sPlayerName);
-
-//Allow you to convert the iIP from AutoAuthenticationScript and ConnectionValidScript to "x.x.x.x" format
-string XPMsgServer_IpIntToString(int iIP);
+//If you use a WelcomeScreen, use it to set sPlayerName as "known" and so, don't print the screen for they
+void XPMsgServer_Known(string sPlayerName);
 
 /*****************************************************************************
 ******************* To be used in the ConnectionValidScript ******************
@@ -70,19 +67,6 @@ void XPMsgServer_ScriptResponseMsg(string sMsg);
 ///////////////////////////////////////////////////////////////////////////////
 
 /*****************************************************************************/
-
-
-string XPMsgServer_IpIntToString(int iIP)
-{
-	int iA = iIP & 0xFF;
-	int iB = (iIP & 0xFF00) >> 8;
-	int iC = (iIP & 0xFF0000) >> 16;
-	int iD = (iIP & 0xFF000000) >> 24;
-	string sIP = IntToString(iA) + ".";
-	sIP += IntToString(iB) + "." + IntToString(iC) + "." + IntToString(iD);
-
-	return sIP;
-}
 
 void XPMsgServer_SetEnforcedSecurity(int bActivated)
 {
@@ -104,9 +88,9 @@ void XPMsgServer_Unblock(string sPlayerName)
 	NWNXSetInt("MsgServer", "Unblock", sPlayerName, 0, 0);
 }
 
-void XPMsgServer_Knowed(string sPlayerName)
+void XPMsgServer_Known(string sPlayerName)
 {
-	NWNXSetInt("MsgServer", "Knowed", sPlayerName, 0, 1);
+	NWNXSetInt("MsgServer", "Known", sPlayerName, 0, 1);
 }
 
 void XPMsgServer_SetConnectionSystem(int bActivated)
@@ -124,3 +108,12 @@ void XPMsgServer_SetAntiCheatCreationSystem(int bActivated)
 	NWNXSetInt("MsgServer", "AnticheatCreation", "", 0, bActivated);
 }
 
+int XPMsgServer_GetIsPlayer(int iPrivileges){
+	return (iPrivileges & 1) != 0;
+}
+int XPMsgServer_GetIsDM(int iPrivileges){
+	return (iPrivileges & 2) != 0;
+}
+int XPMsgServer_GetIsAdmin(int iPrivileges){
+	return (iPrivileges & 4) != 0;
+}

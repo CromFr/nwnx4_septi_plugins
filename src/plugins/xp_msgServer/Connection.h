@@ -84,7 +84,7 @@ class MsgServ final : public Plugin
 	GameObjectManager m_ObjectManager;
 	std::string nwnxStringHome;
 
-	std::unordered_map<std::string, PlayerConnection> _knowedPlayer;
+	std::unordered_map<std::string, PlayerConnection> _knownPlayers;
 
 	bool bConnectionProcess	= true;
 	bool bTraceEveryMsg = false;

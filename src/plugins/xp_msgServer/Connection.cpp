@@ -261,7 +261,7 @@ void OpenLoginGui(unsigned long iMustView)
 void CloseLoginGui(unsigned long iMustView)
 {
 	std::string sName = GetPlayerAccountName_(iMustView);
-	g_msgServ->_knowedPlayer[sName].m_BadPassword = false;
+	g_msgServ->_knownPlayers[sName].m_BadPassword = false;
 	SendMessageToPlayer_(iMustView, (unsigned char*)DataLoginClose, 0x22, 0);
 }
 
@@ -269,7 +269,7 @@ void CloseLoginGui(unsigned long iMustView)
 //it will not dont change until unblock/restart
 void MsgServBanPlayerName(std::string playerName)
 {
-	g_msgServ->_knowedPlayer[playerName].m_step = -2;
+	g_msgServ->_knownPlayers[playerName].m_step = -2;
 }
 
 //Launch the gui, change the text (and hide the respawn button if we use the default panel)
@@ -279,8 +279,8 @@ bool OpenKickGui(unsigned long iMustView, std::string sText)
 	
 	//Let it be blocked. Never allow anything now (until new connexion)
 	//Just be sure to not "unban" someone by trying to kick
-	if(g_msgServ->_knowedPlayer[sName].m_step != -2)
-		g_msgServ->_knowedPlayer[sName].m_step = -1;
+	if(g_msgServ->_knownPlayers[sName].m_step != -2)
+		g_msgServ->_knownPlayers[sName].m_step = -1;
 
 	//Open the panel
 	SendMessageToPlayer_(iMustView, (unsigned char*)g_msgServ->DataKickOpen, g_msgServ->LengthKickPanelOpen, 0);
@@ -438,7 +438,6 @@ BOOL __stdcall MsgServOnReceive(
 	try
 	{
 		std::string currentName_(GetPlayerAccountName_(playerId));
-		unsigned long currentIP_ = 0;
 
 		//Only if we want to trace everything
 		if (g_msgServ->bTraceEveryMsg)
@@ -449,10 +448,12 @@ BOOL __stdcall MsgServOnReceive(
 		//Only if we want to active loggin module.
 		if (g_msgServ->bConnectionProcess)
 		{
+			std::string currentIP_;
 			{
 				sockaddr_in sin;
 				GetPlayerConnectionInfo_(playerId, &sin);
-				currentIP_ = sin.sin_addr.s_addr;
+				const auto ip = sin.sin_addr.s_addr;
+				currentIP_ = std::format("{}.{}.{}.{}", (ip>>24) & 0xFF, (ip>>16) & 0xFF, (ip>>8) & 0xFF, ip & 0xFF);
 			}
 
 
@@ -467,23 +468,23 @@ BOOL __stdcall MsgServOnReceive(
 
 
 					//Do we know this player ?
-					if(g_msgServ->_knowedPlayer.count(currentName_) > 0)
+					if(g_msgServ->_knownPlayers.count(currentName_) > 0)
 					{
 						//Banned guy, don't let it came in and reset the step.
-						if(g_msgServ->_knowedPlayer[currentName_].m_status == MsgServPlayerStatus::Ban)
+						if(g_msgServ->_knownPlayers[currentName_].m_status == MsgServPlayerStatus::Ban)
 						{
 							if(OpenKickGui(playerId, g_msgServ->ErrorMsg))
 								return false;
 						}
 					}
 
-					g_msgServ->_knowedPlayer[currentName_].m_status = MsgServPlayerStatus::Know;
-					g_msgServ->_knowedPlayer[currentName_].m_BadPassword = false;
+					g_msgServ->_knownPlayers[currentName_].m_status = MsgServPlayerStatus::Know;
+					g_msgServ->_knownPlayers[currentName_].m_BadPassword = false;
 
 
 					//First time we come here. Check if the player is in "auto connect" mode
 					{
-						g_msgServ->_knowedPlayer[currentName_].m_BadPassword = false;
+						g_msgServ->_knownPlayers[currentName_].m_BadPassword = false;
 						//Need to see if we need to auto-reconnect the player
 						if(g_msgServ->ScriptStayConnectedScriptName != "")
 						{
@@ -492,9 +493,10 @@ BOOL __stdcall MsgServOnReceive(
 							int currentValidity_  = 0;
 							bool isExecScriptOk = true;
 
+
 							NWScript::ClearScriptParams();
 							NWScript::AddScriptParameterString(currentName_.c_str());
-							NWScript::AddScriptParameterInt((int32_t)currentIP_);
+							NWScript::AddScriptParameterString(currentIP_.c_str());
 							NWScript::AddScriptParameterString(currentCdKey_.c_str());
 							NWScript::AddScriptParameterInt(currentPlayerPriv_);
 							currentValidity_ = NWScript::ExecuteScriptEnhanced(g_msgServ->ScriptStayConnectedScriptName.c_str(), 0, true, &isExecScriptOk, true);
@@ -504,7 +506,7 @@ BOOL __stdcall MsgServOnReceive(
 								//Error on script, log and continue as not autoconnected.
 								std::string strLog = "Error on StayConnected Script (" +
 									g_msgServ->ScriptStayConnectedScriptName + ") params : " + currentName_ +
-									", " + std::to_string(currentIP_) + ", " + currentCdKey_ +
+									", " + currentIP_ + ", " + currentCdKey_ +
 									", " + std::to_string(currentPlayerPriv_);
 
 								logger->Err(strLog.c_str());
@@ -512,7 +514,7 @@ BOOL __stdcall MsgServOnReceive(
 							//Auto connect
 							else if (currentValidity_ == SCRIPTRESPONSE_OK)
 							{
-								g_msgServ->_knowedPlayer[currentName_].m_status = MsgServPlayerStatus::Logged;
+								g_msgServ->_knownPlayers[currentName_].m_status = MsgServPlayerStatus::Logged;
 							}
 							//Block/kick/ban
 							else if (currentValidity_ == SCRIPTRESPONSE_KICK || currentValidity_ == SCRIPTRESPONSE_BAN)
@@ -527,13 +529,13 @@ BOOL __stdcall MsgServOnReceive(
 					}
 
 					//If not autologged, show the pannel
-					if(g_msgServ->_knowedPlayer[currentName_].m_status != MsgServPlayerStatus::Logged)
+					if(g_msgServ->_knownPlayers[currentName_].m_status != MsgServPlayerStatus::Logged)
 					{						
 						OpenLoginGui(playerId);
 					}
 
 					//Send welcome/warning pop up here ?
-					if (!g_msgServ->_knowedPlayer[currentName_].m_Know)
+					if (!g_msgServ->_knownPlayers[currentName_].m_Know)
 					{
 						if (g_msgServ->bWelcomeScreen)
 						{
@@ -550,14 +552,14 @@ BOOL __stdcall MsgServOnReceive(
 				else
 				{
 					//Be sure that we know the player (and so, at least, use the reset step)
-					if (g_msgServ->_knowedPlayer.count(currentName_) <= 0)
+					if (g_msgServ->_knownPlayers.count(currentName_) <= 0)
 					{
-						g_msgServ->_knowedPlayer[currentName_].m_status = MsgServPlayerStatus::Know;
-						g_msgServ->_knowedPlayer[currentName_].m_BadPassword = false;
+						g_msgServ->_knownPlayers[currentName_].m_status = MsgServPlayerStatus::Know;
+						g_msgServ->_knownPlayers[currentName_].m_BadPassword = false;
 					}
 
 					//This player name is set as "kicked" or "banned", don't accept anything from this account
-					if (g_msgServ->_knowedPlayer[currentName_].m_status <= MsgServPlayerStatus::Kick)
+					if (g_msgServ->_knownPlayers[currentName_].m_status <= MsgServPlayerStatus::Kick)
 					{
 						OpenKickGui(playerId, g_msgServ->ErrorMsg);
 						return FALSE;
@@ -565,7 +567,7 @@ BOOL __stdcall MsgServOnReceive(
 					
 
 					//Not logged yet. 
-					if (g_msgServ->_knowedPlayer[currentName_].m_status != MsgServPlayerStatus::Logged && Length >= 3)
+					if (g_msgServ->_knownPlayers[currentName_].m_status != MsgServPlayerStatus::Logged && Length >= 3)
 					{
 						//Do we try to log ?
 						if (Length >= 31 && Data[1] == 0x06 && Data[2] == 0x30 && Data[7] == 0x13 && Data[8] == 0x00 && Data[9] == 0x00 && Data[10] == 0x00 && Data[11] == 0x67 &&
@@ -661,7 +663,7 @@ BOOL __stdcall MsgServOnReceive(
 									currentLog_ = currentName_;
 									{
 										std::string strLog = "Enforced connection by script asked but no script given for it. Allow " + currentPlayerPriv_;
-										strLog += ", " + std::to_string(currentIP_) + ", " + currentCdKey_;
+										strLog += ", " + currentIP_ + ", " + currentCdKey_;
 										strLog += ", " + std::to_string(currentPlayerPriv_) + " to connect without any further verification.";
 
 										logger->Warn(strLog.c_str());
@@ -672,7 +674,7 @@ BOOL __stdcall MsgServOnReceive(
 
 									NWScript::ClearScriptParams();
 									NWScript::AddScriptParameterString(currentName_.c_str());
-									NWScript::AddScriptParameterInt((int32_t)currentIP_);
+									NWScript::AddScriptParameterString(currentIP_);
 									NWScript::AddScriptParameterString(currentCdKey_.c_str());
 									NWScript::AddScriptParameterInt(currentPlayerPriv_);
 									NWScript::AddScriptParameterString(currentLog_.c_str());
@@ -693,7 +695,7 @@ BOOL __stdcall MsgServOnReceive(
 									//Error on script, log and continue as not connected.
 									std::string strLog = "Error on Connection Script (";
 									strLog += g_msgServ->ScriptConnectionName + ") params : " + currentName_;
-									strLog += ", " + std::to_string(currentIP_) + ", " + currentCdKey_;
+									strLog += ", " + currentIP_ + ", " + currentCdKey_;
 									strLog += ", " + std::to_string(currentPlayerPriv_);
 									strLog += ", " + currentLog_ + ", (size of given pwd:)" + std::to_string(currentPwd_.length());
 									strLog += ", " + currentOption_;
@@ -704,14 +706,14 @@ BOOL __stdcall MsgServOnReceive(
 								//OK !
 								else if (currentValidity_ == SCRIPTRESPONSE_OK)
 								{
-									g_msgServ->_knowedPlayer[currentName_].m_status = MsgServPlayerStatus::Logged;
+									g_msgServ->_knownPlayers[currentName_].m_status = MsgServPlayerStatus::Logged;
 									CloseLoginGui(playerId);
 								}
 								//NOP
 								else if(currentValidity_ == SCRIPTRESPONSE_NOK)
 								{
 									BadPassword(playerId, g_msgServ->curResponseString_);
-									g_msgServ->_knowedPlayer[currentName_].m_BadPassword = true;
+									g_msgServ->_knownPlayers[currentName_].m_BadPassword = true;
 									return FALSE;
 								}
 								//Kick/block
@@ -1254,12 +1256,12 @@ void MsgServ::SetInt([[maybe_unused]] char* sFunction,
 	else if (function == "Unblock")
 	{
 		std::string sPlayer(sParam1);
-		_knowedPlayer[sPlayer].m_step = 0;
+		_knownPlayers[sPlayer].m_step = 0;
 	}
-	else if (function == "Knowed")
+	else if (function == "Known")
 	{
 		std::string sPlayer(sParam1);
-		_knowedPlayer[sPlayer].m_Know = (nValue != 0);
+		_knownPlayers[sPlayer].m_Know = (nValue != 0);
 	}
 
 	return;
