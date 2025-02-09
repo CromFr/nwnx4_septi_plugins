@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////////////
 
+#include "nwnx_MsgServer"
 
 /*
  * This function will test if an incoming player should be automatically connected (HEIMDALL_RET_OK) 
