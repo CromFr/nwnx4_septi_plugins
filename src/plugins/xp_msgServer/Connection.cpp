@@ -3,6 +3,7 @@
 
 #include <NWN2Lib/NWN2.h>
 #include <NWN2Lib/NWN2Common.h>
+#include <cstring>
 #include <hook/scriptManagement.h>
 #include <misc/log.h>
 #include <nwn2heap.h>
@@ -18,6 +19,7 @@
 #include <fstream>
 #include "../../septutil/srvadmin.h"
 #include "../../septutil/win_utils.h"
+#include "../../septutil/bytearray.h"
 
 #define MAX_PLAYERS               0x60
 
@@ -244,18 +246,85 @@ void BadPassword(unsigned long iMustView, std::string sMessage)
 	delete[] Data;
 }
 
-void OpenLoginGui(unsigned long iMustView)
+
+
+
+
+
+void SendOpenGUI(unsigned long playerID, const std::string& sceneName, const std::string& xmlFileName){
+	uint32_t msgDataSize = 22 + sceneName.size() + 4 + xmlFileName.size();
+	auto msgData = ByteArray{msgDataSize + 1};
+
+	msgData.extend({0x50, 0x24, 0x04});
+	msgData.extend((uint32_t)msgDataSize);
+	msgData.extend((uint32_t)sceneName.size());
+	msgData.extend(sceneName);
+	msgData.extend((uint32_t)xmlFileName.size());
+	msgData.extend(xmlFileName);
+	msgData.extend({0xB3});
+
+	SendMessageToPlayer_(playerID, msgData.data.data(), msgData.data.size(), 0);
+}
+
+void SendSetGUIObjectVisible(unsigned long playerID, const std::string& sceneName, const std::string& sUIObjectName){
+	uint32_t msgDataSize = 22 + sceneName.size() + 4 + sUIObjectName.size();
+	auto msgData = ByteArray{msgDataSize + 1};
+
+	msgData.extend({0x50, 0x24, 0x06});
+	msgData.extend((uint32_t)msgDataSize);
+	msgData.extend((uint32_t)sceneName.size());
+	msgData.extend(sceneName);
+	msgData.extend((uint32_t)sUIObjectName.size());
+	msgData.extend(sUIObjectName);
+	msgData.extend({0x87});
+
+	SendMessageToPlayer_(playerID, msgData.data.data(), msgData.data.size(), 0);
+}
+void SendSetGUIObjectHidden(unsigned long playerID, const std::string& sceneName, const std::string& sUIObjectName){
+	uint32_t msgDataSize = 22 + sceneName.size() + 4 + sUIObjectName.size();
+	auto msgData = ByteArray{msgDataSize + 1};
+
+	msgData.extend({0x50, 0x24, 0x06});
+	msgData.extend((uint32_t)msgDataSize);
+	msgData.extend((uint32_t)sceneName.size());
+	msgData.extend(sceneName);
+	msgData.extend((uint32_t)sUIObjectName.size());
+	msgData.extend(sUIObjectName);
+	msgData.extend({0x97});
+
+	SendMessageToPlayer_(playerID, msgData.data.data(), msgData.data.size(), 0);
+}
+
+void SendSetGuiObjectText(unsigned long playerID, const std::string& sceneName, const std::string& sUIObjectName, const std::string& sText){
+	uint32_t msgDataSize = 22 + sceneName.size() + 4 + sUIObjectName.size() + 4 + sText.size();
+	auto msgData = ByteArray{msgDataSize + 1};
+
+	msgData.extend({0x50, 0x24, 0x0A});
+	msgData.extend((uint32_t)msgDataSize);
+	msgData.extend((uint32_t)sceneName.size());
+	msgData.extend(sceneName);
+	msgData.extend((uint32_t)sUIObjectName.size());
+	msgData.extend(sUIObjectName);
+	msgData.extend((uint32_t)sText.size());
+	msgData.extend(sText);
+	msgData.extend({0x93});
+
+	SendMessageToPlayer_(playerID, msgData.data.data(), msgData.data.size(), 0);
+}
+
+
+void OpenLoginGui(unsigned long playerID)
 {
-	SendMessageToPlayer_(iMustView, (unsigned char*)DataLoginOpen, 0x37, 0);
+	SendOpenGUI(playerID, "SCREEN_SEPT_CONNECTION", LoginXmlFile);
 
 	if (g_msgServ->bAllowAutoConnect)
 	{
-		SendMessageToPlayer_(iMustView, (unsigned char*)DataLoginShowRemember, 0x34, 0);
-		SendMessageToPlayer_(iMustView, (unsigned char*)DataLoginShowRemBtn, 0x34, 0);
+		SendSetGUIObjectVisible(playerID, "SCREEN_SEPT_CONNECTION", "SavePasswordTX");
+		SendSetGUIObjectVisible(playerID, "SCREEN_SEPT_CONNECTION", "SavePasswordCB");
 		//Change text latter
-		SendMessageToPlayer_(iMustView, (unsigned char*)g_msgServ->DataLogSetRememberMeText, g_msgServ->LengthLogRememberMe, 0);
+		SendMessageToPlayer_(playerID, (unsigned char*)g_msgServ->DataLogSetRememberMeText, g_msgServ->LengthLogRememberMe, 0);
 	}
-	BadPassword(iMustView, ""); //Set current BadPassword Text to ""
+	BadPassword(playerID, ""); //Set current BadPassword Text to ""
 }
 
 void CloseLoginGui(unsigned long iMustView)
@@ -1298,6 +1367,9 @@ MsgServ::SetString([[maybe_unused]] char* sFunction,
 
 		logTxt      = "Set Response to : " + str;
 		logger->Trace(logTxt.c_str());
+	}
+	else if(sFunction == "SetLoginXml"){
+		LoginXmlFile = sValue;
 	}
 
 	return;

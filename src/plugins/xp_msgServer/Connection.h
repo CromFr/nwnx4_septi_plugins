@@ -150,6 +150,9 @@ class MsgServ final : public Plugin
 	std::string PopUpPanelXml = "";
 
 
+	std::string LoginXmlFile = "sept_heimdall.xml"
+
+
 
 };
 

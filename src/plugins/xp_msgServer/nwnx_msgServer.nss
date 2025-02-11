@@ -117,3 +117,8 @@ int XPMsgServer_GetIsDM(int iPrivileges){
 int XPMsgServer_GetIsAdmin(int iPrivileges){
 	return (iPrivileges & 4) != 0;
 }
+
+void XPMsgServer_SetLoginXml(string sLoginScreenXml)
+{
+	NWNXSetString("MsgServer", "SetLoginXml", "", 0, sLoginScreenXml);
+}
