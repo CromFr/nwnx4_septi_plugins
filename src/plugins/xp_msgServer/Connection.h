@@ -8,6 +8,9 @@
 #include <memory>
 #include <unordered_map>
 #include <functional>
+#include <variant>
+#include <optional>
+#include <unordered_set>
 
 #ifdef WIN32
 #include <windows.h>
@@ -79,18 +82,11 @@ class MsgServ final : public Plugin
 
   public:
 
-	//LogNWNX* logger;
-	SimpleIniConfig* config;
+	std::unique_ptr<SimpleIniConfig> config;
 	GameObjectManager m_ObjectManager;
 	std::string nwnxStringHome;
 
-	std::unordered_map<std::string, PlayerConnection> _knownPlayers;
-
-	bool bConnectionProcess	= true;
 	bool bTraceEveryMsg = false;
-	bool bAllowAutoConnect = false;
-	bool bWelcomeScreen = false;
-	bool bDwnloadPanel = false;
 	bool b3CDKey = false;
 
 
@@ -105,52 +101,45 @@ class MsgServ final : public Plugin
 	std::list<int> lRangerCombatFeats;
 
 
-	std::string ScriptConnectionName = "";
-	std::string ScriptStayConnectedScriptName = "";
-	std::string ErrorMsg = "";
-	std::string sWelcome = "";
+	struct {
+		enum ScriptRet{
+			WAIT  = 1,
+			ALLOW = 2,
+			KICK  = 3,
+		};
 
-	/*
-	int currentPlayerPriv_;
-	std::string currentName_;
-	unsigned long currentIP_;
-	std::string currentLog_;
-	std::string currentPwd_;
-	std::string currentOption_;
-	std::string currentCdKey_;
-	int currentValidity_ ;
-	*/
+		bool enabled;
 
+		std::string onConnectionScript;
 
-	std::string curResponseString_;
+		// This variable is only set during the execution of OnConnected script
+		std::optional<std::tuple<unsigned long, std::string>> currentPlayerInfo;
 
+		std::unordered_map<unsigned long, std::string> authorizedGUIScripts;
 
+		std::unordered_set<unsigned long> authorizedPlayerIDs;
+	} m_heimdall;
 
+	// bool isScriptExecAllowed(const std::string_view& accountName, const std::string_view& script){
+	// 	if(const auto aut = m_heimdall.authorizations.find(accountName); aut != m_heimdall.authorizations.end()){
+	// 		if (const auto val = std::get_if<bool>(&aut)){
+	// 			return *val;
+	// 		} else {
+	// 			return std::get<std::unordered_set>(aut).contains(script);
+	// 		}
+	// 	} else {
+	// 		return false;
+	// 	}
+	// }
 
-	
-	std::unordered_map<std::string, MySharedHookFunction> _fctList;
-	//std::unordered_map<std::string, std::function<bool(int, unsigned char*, int)>> _fctList;
+	// void NWNX_SetAuthorizedGUIScript(const std::string_view& scriptName);
+	// void NWNX_SetAuthorized(bool allowed);
 
-	//unsigned char* DataLogSetTitleText = NULL;
-	//unsigned char* DataLogSetLogText = NULL;
-	//unsigned char* DataLogSetPwdText = NULL;
-	//unsigned long LengthLogTitle = 0;
-	//unsigned long LengthLogLog = 0;
-	//unsigned long LengthLogPwd = 0;
-	unsigned char* DataLogSetRememberMeText = NULL;
-	unsigned long LengthLogRememberMe = 0;
-	std::string RememberMeText = "";
-
-	unsigned char* DataKickOpen = NULL;
-	unsigned long LengthKickPanelOpen = 0;
-	std::string KickPanelXml = "";
-
-	unsigned char* DataPopUpOpen = NULL;
-	unsigned long LengthPopUpPanelOpen = 0;
-	std::string PopUpPanelXml = "";
-
-
-
+	void NWNX_SetAuthorizedGUIScript(const std::string_view& scriptName);
+	void NWNX_DisplayGUIScreen(const std::string_view& sceneName, const std::string_view& xmlName);
+	void NWNX_CloseGUIScreen(const std::string_view& sceneName);
+	void NWNX_SetGUIObjectHidden(const std::string_view& sceneName, const std::string_view& objectName, bool hidden);
+	void NWNX_SetGUIObjectText(const std::string_view& sceneName, const std::string_view& objectName, std::string_view text);
 };
 
 

@@ -3950,12 +3950,12 @@ namespace {
 
 } // namespace
 
-bool ApplyAntiCheatCreationPatch(SimpleIniConfig* config, bool activateIt)
+bool ApplyAntiCheatCreationPatch(SimpleIniConfig& config, bool activateIt)
 {
 	g_ScriptCreationError = "";
 
 	//Script on error (creation) ?
-	config->Read("ScriptOnCreationError", &g_ScriptCreationError, std::string(""));
+	config.Read("ScriptOnCreationError", &g_ScriptCreationError, std::string(""));
 	
 	gfMinScaleX = 0.95f;
 	gfMinScaleZ = 0.95f;
@@ -3963,14 +3963,14 @@ bool ApplyAntiCheatCreationPatch(SimpleIniConfig* config, bool activateIt)
 	gfMaxScaleZ = 1.05f;
 
 	int iCreationStopFirst = 0;
-	config->Read("StopLvlUpFirstViolation", &iCreationStopFirst, 1);
+	config.Read("StopLvlUpFirstViolation", &iCreationStopFirst, 1);
 	gMsgServerStopFirstCreation = (iCreationStopFirst != 0);
 
-	config->Read("MinScaleX", &gfMinScaleX, 0.95f);
-	config->Read("MinScaleZ", &gfMinScaleZ, 0.95f);
+	config.Read("MinScaleX", &gfMinScaleX, 0.95f);
+	config.Read("MinScaleZ", &gfMinScaleZ, 0.95f);
 
-	config->Read("MaxScaleX", &gfMaxScaleX, 1.05f);
-	config->Read("MaxScaleZ", &gfMaxScaleZ, 1.05f);
+	config.Read("MaxScaleX", &gfMaxScaleX, 1.05f);
+	config.Read("MaxScaleZ", &gfMaxScaleZ, 1.05f);
 
 	int i = 0;
 	while(CharacterCreationPatches[i].Apply()) {

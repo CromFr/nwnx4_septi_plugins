@@ -2,7 +2,7 @@
 #define SEPT_APPLISTMANAGEMENT
 
 #include <string>
-#include <misc/log.h>
+#include <misc/log.h> 
 
 
 class AppearanceListManagement
