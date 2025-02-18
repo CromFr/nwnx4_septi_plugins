@@ -1,0 +1,603 @@
+//-
+	Crom widget library for building NWN2 GUIs
+
+	Read the code, every mixin has a documentation header
+
+
+-
+	// Add the line `- locale = "fr";` before the include to set the preferred locale
+	//
+	var localization = {};
+	switch(locale){
+		default:
+			localization = {
+				"cancel": "Cancel",
+				"reset": "Reset",
+			};
+			break;
+		case "fr":
+			localization = {
+				"cancel": "Annuler",
+				"reset": "Réinitialiser",
+			};
+			break;
+	}
+
+	function splitAttributes(attributes, categories, defaultCat=-1){
+		let ret = []
+		for (let i = 0 ; i < categories.length ; i++)
+			ret.push({})
+
+		for(const attr in attributes){
+			for(let i = 0 ; i < categories.length ; i++){
+				if(categories[i].indexOf(attr) >= 0){
+					ret[i][attr] = attributes[attr]
+					break;
+				}
+
+				if(i + 1 == categories.length && defaultCat >= 0){
+					ret[defaultCat][attr] = attributes[attr]
+				}
+			}
+		}
+		return ret;
+	}
+
+	function setDefaultValues(attributes, defaultValues){
+		for(const attr in defaultValues){
+			if(attributes[attr] == undefined)
+				attributes[attr] = defaultValues[attr]
+		}
+	}
+
+//- Decorated UIPane
+//-
+//- The width and height attributes will define the inner UIPane size, making the entire UIPane with borders slightly larger (+31 width / + 38 height)
+//-
+//- Attributes:
+//-   x, y, capturemouseclicks: forwarded to the outer UIPane
+//-   width, height: defines the inner size. DO NOT USE "PARENT_WIDTH/HEIGHT" as width/height values, use numerical values instead.
+//-   topleft, topright, bottomleft, bottomright, top, bottom, left, right, border: forwarded to the frame border's UIFrame
+//-   fill, fillstyle: forwarded to the filling's UIFrame
+//-   padding, xpadding, ypadding: padding between the inner frame borders and the content. padding is a shorthand for both paddings
+mixin FancyFramedPane()
+	- if(typeof attributes.width != "number") throw "width is not a number"
+	- if(typeof attributes.height != "number") throw "height is not a number"
+	-
+		if(attributes.xpadding == undefined) attributes.xpadding = attributes.padding
+		if(attributes.ypadding == undefined) attributes.ypadding = attributes.padding
+
+		setDefaultValues(attributes, {
+			"xpadding": 0,
+			"ypadding": 0,
+		})
+		let [outerAttrs, frameAttrs, fillAttrs, specAttrs] = splitAttributes(attributes, [
+			["x", "y", "capturemouseclicks"],
+			["topleft", "topright", "bottomleft", "bottomright", "top", "bottom", "left", "right", "border"],
+			["fill", "fillstyle"],
+			["width", "height", "xpadding", "ypadding", "padding"]
+		], 0)
+
+	UIPane(
+		width=specAttrs.width + 31
+		height=specAttrs.height + 38
+		capturemouseclicks="false"
+	)&attributes(outerAttrs)
+		UIPane(
+			x=15 + specAttrs.xpadding
+			y=23 + specAttrs.ypadding
+			width=specAttrs.width - 2 * specAttrs.xpadding
+			height=specAttrs.height - 2 * specAttrs.ypadding
+			capturemouseclicks="false"
+		)
+			block
+
+		UIFrame(
+			x=15
+			y=23
+			width=specAttrs.width
+			height=specAttrs.height
+			fill="cloth_bg.tga"
+			fillstyle="tile"
+		)&attributes(fillAttrs)
+		UIFrame(
+			topleft="frame_main_d_TL.tga" topright="frame_main_t_TR.tga" bottomleft="frame_main_d_BL.tga" bottomright="frame_main_d_BR.tga"
+			top="frame_main_T.tga" bottom="frame_main_B.tga" left="frame_main_L.tga" right="frame_main_R.tga"
+			border="45"
+		)&attributes(frameAttrs)
+
+//- Simple framed UIPane
+//-
+//- Parameters:
+//-   padding: Padding for the inner UIPane
+//-   fill: fill the frame with black background
+//- Attributes:
+//-   width, height: defines the outer size. DO NOT USE "PARENT_WIDTH/HEIGHT" as width/height values, use numerical values instead
+//-   Additional attributes are forwarded to the outer UIPane
+//-   fill: boolean for filling the framed pane with black. Defaults to true
+mixin SimpleFramedPane()
+	- if(typeof attributes.width != "number") throw "width is not a number"
+	- if(typeof attributes.height != "number") throw "height is not a number"
+	-
+		if(attributes.xpadding == undefined) attributes.xpadding = attributes.padding
+		if(attributes.ypadding == undefined) attributes.ypadding = attributes.padding
+
+		setDefaultValues(attributes, {
+			"xpadding": 3,
+			"ypadding": 3,
+			"fill": "true",
+		})
+		let [outerAttrs, specAttrs] = splitAttributes(attributes, [
+			["x", "y", "width", "height", "capturemouseclicks"],
+			["xpadding", "ypadding", "padding", "fill"]
+		], 0)
+
+	UIPane(capturemouseclicks="false")&attributes(outerAttrs)
+		UIPane(
+			x=specAttrs.xpadding
+			y=specAttrs.ypadding
+			width=attributes.width - 2 * specAttrs.xpadding
+			height=attributes.height - 2 * specAttrs.ypadding
+			capturemouseclicks="false"
+		)
+			block
+
+		if specAttrs.fill == "true"
+			UIFrame(
+				topleft="tp_frame_tl.tga" topright="tp_frame_tr.tga" bottomleft="tp_frame_bl.tga" bottomright="tp_frame_BR.tga" top="tp_frame_t.tga" bottom="tp_frame_b.tga" left="tp_frame_l.tga" right="tp_frame_r.tga"
+				fillstyle="stretch" fill="tp_frame_bg.tga" border=5
+			)
+		else
+			UIFrame(
+				topleft="tp_frame_tl.tga" topright="tp_frame_tr.tga" bottomleft="tp_frame_bl.tga" bottomright="tp_frame_BR.tga" top="tp_frame_t.tga" bottom="tp_frame_b.tga" left="tp_frame_l.tga" right="tp_frame_r.tga"
+				border=5
+			)
+
+mixin Separator()
+	UIPane(
+		width="PARENT_WIDTH"
+		height=10
+	)&attributes(attributes)
+		UIFrame(y="ALIGN_CENTER" height=3 fill="divider.tga" fillstyle="stretch")
+
+//- Red cancel button
+//-
+//- Attributes:
+//-   Additional attributes are forwarded to the UIButton element
+mixin CancelButton()
+	+CustomButton(
+		released="b_lgr_normal.tga"
+		released_hilighted="b_lgr_hover.tga"
+		pressed="b_lgr_pressed.tga"
+		pressed_hilighted="b_lgr_hover_pressed.tga"
+		text=localization["cancel"]
+	)&attributes(attributes)
+
+//- Button with custom images
+//-
+//- Attributes:
+//-   released: image when the button is released (default state)
+//-   released_hilighted: image when the button is released (default state) and the mouse is over it. Will use released image if not provided.
+//-   pressed: image when the button is being pressed (active state)
+//-   pressed_hilighted: image when the button is being pressed (active state) and the mouse is over it. Will use pressed image if not provided.
+//-   style: the UIButton's style name, as defined in stylesheet.xml
+//-   align, valign, fontfamily, indent: forwarded to the inner UIText element. Ignored if style attribute is set
+//-   txtstyle: the UIButton's UIText style attribute value, as defined in fontfamily.xml. Ignored if style attribute is set
+//-   txtcolor: the UIButton's UIText color attribute value. Ignored if style attribute is set
+//-   Additional attributes are forwarded to the UIButton element
+mixin CustomButton()
+	-
+		if(style == undefined){
+			setDefaultValues(attributes, {
+				"align": "center",
+				"valign": "middle",
+				"fontfamily": "Title_Font",
+				"txtstyle": 1,
+			})
+		}
+		let [btnAttrs, txtAttr, specAttr] = splitAttributes(attributes, [
+			[],
+			["align", "valign", "fontfamily", "indent"],
+			["style", "txtstyle", "txtcolor"],
+		], 0)
+
+		if(attributes.released_hilighted == undefined) attributes.released_hilighted = attributes.released
+		if(attributes.pressed_hilighted == undefined)  attributes.pressed_hilighted = attributes.pressed
+
+	UIButton(MouseUpSFX="gui_button" style!=specAttr.style)&attributes(btnAttrs)
+		if specAttr.style == undefined
+			UIText(
+				style!=specAttr.txtstyle
+				color=specAttr.txtcolor
+			)&attributes(txtAttr)
+		if attributes.released != undefined
+			UIFrame(state="up"         fill=attributes.released)
+			UIFrame(state="focused"    fill=attributes.released)
+			UIFrame(state="disabled"   fill=attributes.released)
+		if attributes.released_hilighted != undefined
+			UIFrame(state="hilited"    fill=attributes.released_hilighted)
+		if attributes.pressed != undefined
+			UIFrame(state="down"       fill=attributes.pressed)
+		if attributes.pressed_hilighted != undefined
+			UIFrame(state="hifocus"    fill=attributes.pressed_hilighted)
+		if attributes.header == "true"
+			if attributes.pressed != undefined
+				UIFrame(state="header"     fill=attributes.pressed)
+			if attributes.pressed_hilighted != undefined
+				UIFrame(state="hiheader"   fill=attributes.pressed_hilighted)
+				UIFrame(state="downheader" fill=attributes.pressed_hilighted)
+
+//- A clickable square icon button
+//-
+//- Attributes:
+//-   icon: the image to display
+//-   Additional attributes are forwarded to the UIButton element
+mixin SquareIconButton
+	-
+		let icon = attributes.icon
+		delete attributes.icon
+	UIButton(MouseUpSFX="gui_button")&attributes(attributes)
+		UIFrame(state="up"       fill="")
+		UIFrame(state="down"     fill="b_blueglow_highlight.tga")
+		UIFrame(state="focused"  fill="attrib_points.tga")
+		UIFrame(state="hilited"  fill="b_blueglow_highlight.tga" alpha="0.5")
+		UIFrame(state="hifocus"  fill="b_blueglow_highlight.tga" alpha="0.5")
+		UIFrame(state="disabled" fill="tp_frame_bg.tga" alpha="0.3")
+		UIFrame(state="base"     fill=icon)
+
+//- A clickable round icon button
+//-
+//- Attributes:
+//-   icon: the image to display
+//-   Additional attributes are forwarded to the UIButton element
+mixin RoundIconButton()
+	-
+		let icon = attributes.icon
+		delete attributes.icon
+	UIButton(MouseUpSFX="gui_button")&attributes(attributes)
+		UIFrame(state="up"       fill="")
+		UIFrame(state="down"     fill="align_highlight.tga")
+		UIFrame(state="focused"  fill="")
+		UIFrame(state="hilited"  fill="align_highlight.tga" alpha="0.5")
+		UIFrame(state="hifocus"  fill="align_highlight.tga" alpha="0.5")
+		UIFrame(state="disabled" fill="align_highlight.tga")
+		UIFrame(state="base"     fill=icon)
+
+//- A standard button with an icon displayed on the left
+//-
+//- Attributes:
+//-   style: defaults to STYLE_LARGE_BUTTON
+//-   Additional attributes are forwarded to the UIButton element
+mixin IconButton(imageFile, iconPadding=1)
+	- if(typeof attributes.width != "number") throw "width is not a number"
+	- if(typeof attributes.height != "number") throw "height is not a number"
+	-
+		setDefaultValues(attributes, {
+			"style": "STYLE_LARGE_BUTTON",
+		})
+		let [paneAttrs, btnAttrs, specAttrs] = splitAttributes(attributes, [
+			["x", "y", "width", "height"],
+			[],
+			["style", "icon"],
+		], 1)
+
+	UIPane(capturemouseclicks="false")&attributes(paneAttrs)
+		UIFrame(
+			x=iconPadding
+			y=iconPadding
+			width=paneAttrs.height - 2 * iconPadding
+			height=paneAttrs.height - 2 * iconPadding
+			ignoreevents="true"
+			fill=specAttrs.icon
+			fillstyle="stretch"
+		)
+
+		UIButton(
+			width="PARENT_WIDTH"
+			height="PARENT_HEIGHT"
+			style!=specAttrs.style
+		)&attributes(btnAttrs)
+
+//- Tab bar to show/hide UI elements
+//-
+//- Arguments:
+//-   tabData: [ ["Tab1UIPaneName", "Tab1Label"], ["Tab2UIPaneName", "Tab2Label"], ... ]
+//- Attributes:
+//-   groupid: a unique ID (for this GUI) for the radio button group ID
+//-   x, y, width, height: size and position of the group of buttons. Each button will take a fraction of the total width.
+//-   Additional attributes are forwarded to each UIButton
+mixin TabBar(tabData)
+	- if(typeof attributes.width != "number") throw "width is not a number"
+	-
+		setDefaultValues(attributes, {
+			"style": "MP_BROWSER_TAB_302",
+		})
+		let [paneAttrs, btnAttrs, specAttrs] = splitAttributes(attributes, [
+			["x", "y", "width", "height"],
+			[],
+			["style"],
+		], 1)
+
+	UIPane(
+		capturemouseclicks="false"
+	)&attributes(paneAttrs)
+		- var step = paneAttrs.width / tabData.length
+		for data, i in tabData
+			- var start = Math.floor(step * i)
+			- var end = Math.floor(step * (i + 1))
+
+			+CustomButton(
+				x=start
+				width=end - start
+				height="PARENT_HEIGHT"
+				text=data[1]
+				buttontype="radio" groupid=attributes.groupid groupmemberid=i + 1
+				OnSelected=`UIButton_Input_ShowObject('${data[0]}')`
+				OnUnselected=`UIButton_Input_HideObject('${data[0]}')`
+				style!=specAttrs.style
+			)&attributes(btnAttrs)
+
+
+//- Label for any UI element
+//-
+//- Attributes:
+//-   width, height: defines the outer size. DO NOT USE "PARENT_WIDTH" as width value, use numerical values instead. Default height is 20
+//-   label_width: width of the label text
+//-   text: text of the label
+//-   Additional attributes are forwarded to the label's UIText
+mixin LabeledPane()
+	- if(typeof attributes.width != "number") throw "width is not a number"
+	-
+		setDefaultValues(attributes, {
+			"label_width": 80,
+		})
+		let [paneAttrs, txtAttrs, specAttrs] = splitAttributes(attributes, [
+			["x", "y", "width", "height"],
+			[],
+			["label_width"],
+		], 1)
+	UIPane(height=20 capturemouseclicks="false")&attributes(paneAttrs)
+		//- label
+		UIText(
+			width=specAttrs.label_width
+			height="PARENT_HEIGHT"
+			ignoreevents="true"
+			align="left"
+			valign="middle"
+		)&attributes(txtAttrs)
+
+		//- content
+		UIPane(
+			x=specAttrs.label_width
+			width=paneAttrs.width - specAttrs.label_width
+			height="PARENT_HEIGHT"
+			capturemouseclicks="false"
+		)
+			block
+
+
+//- Text input box, with a reset button. The content of the input box is stored in a GUI variable.
+//-
+//- Attributes:
+//-   width, height: defines the outer size. DO NOT USE "PARENT_WIDTH" as width value, use numerical values instead. Default height is 20
+//-   label: text displayed in front of the input box
+//-   label_width: forwarded to +LabeledPane
+//-   variable: GUI variable used to store the content (ex: "local:42")
+//-   tooltip: text displayed when hovering the input box
+//-   Additional attributes are forwarded to the input box's UIText element
+mixin LabeledTextInput()
+	-
+		setDefaultValues(attributes, {
+			"label_width": 80,
+			"multiline": "false",
+			"tooltip": null,
+			"allowpunc": "true",
+			"allowspace": "true",
+		})
+		if(attributes.multiline == "true"){
+			setDefaultValues(attributes, {
+				"height": 40,
+				"maxlength": 1024,
+				"returnrestricted": "false",
+				"align": "left",
+				"valign": "top",
+			})
+		}
+		else{
+			setDefaultValues(attributes, {
+				"height": 20,
+			})
+		}
+
+		let [labelAttrs, txtinAttrs, specAttrs] = splitAttributes(attributes, [
+			["x", "y", "width", "height", "label_width"],
+			[],
+			["variable", "tooltip", "label"],
+		], 1)
+
+	+LabeledPane(text=specAttrs.label)&attributes(labelAttrs)
+		+SimpleFramedPane(
+			width=labelAttrs.width - labelAttrs.label_width
+			height=labelAttrs.height
+		)
+			UIText(
+				width="PARENT_WIDTH" height="PARENT_HEIGHT"
+				align="center" valign="middle"
+				fontfamily="International"
+				multiline="false"
+				maxlength=24
+				returnrestricted="true"
+				editable="true" selectable="true"
+				update=specAttrs.variable != null ? "true" : undefined
+				OnUpdate=specAttrs.variable != null ? `UIObject_Misc_SetLocalVarString(${specAttrs.variable})` : undefined
+				OnToolTip=specAttrs.tooltip != null? `UIObject_Tooltip_DisplayTooltipString("${specAttrs.tooltip}",OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_2,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)` : undefined
+			)&attributes(txtinAttrs)
+
+
+
+//- Text input box, with a reset button. The content of the input box is stored in a GUI variable.
+//-
+//- Attributes:
+//-   width, height: defines the outer size. DO NOT USE "PARENT_WIDTH" as width value, use numerical values instead. Default height is 20
+//-   name: name of the UIText object, for referencing. If not provided, a rather unique name is generated.
+//-   label: text displayed in front of the input box
+//-   label_width: forwarded to +LabeledPane
+//-   variable: GUI variable used to store the content (ex: "local:42")
+//-   tooltip: text displayed when hovering the input box
+//-   Additional attributes are forwarded to the input box's UIText element
+mixin LabeledTextInputWithReset()
+	-
+		setDefaultValues(attributes, {
+			"name": "__TEXT_INPUT_" + attributes.label + "_" + attributes.variable,
+			"height": 20,
+		})
+		let [paneAttrs, txtAttrs] = splitAttributes(attributes, [
+			["x", "y", "width", "height"],
+			[],
+		], 1)
+
+	UIPane(
+		capturemouseclicks="false"
+	)&attributes(paneAttrs)
+		+LabeledTextInput(label, variable, tooltip, labelWidth)(
+			width=paneAttrs.width - 20
+			height=paneAttrs.height
+		)&attributes(txtAttrs)
+
+		UIButton(
+			x="ALIGN_RIGHT"
+			width=20
+			height=20
+			style="STYLE_CLOSE_BUTTON"
+			OnLeftClick=`UIObject_Input_ClearTextfield("${txtAttrs.name}")`
+			OnToolTip=`UIObject_Tooltip_DisplayTooltipString("${localization["reset"]}",OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_2,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)`
+		)
+
+
+//- Small title/section header
+//-
+//- Attributes:
+//-   x, y, width, height: size and position of the header
+//-   text, indent: forwarded to the UIText element.
+//-   fill: forwarded to the UIFrame element. Defaults to "b_qj_normal.tga"
+//-   fillstyle forwarded to the UIFrame element. Defaults to "stretch"
+//-   Additional attributes are forwarded to the header's UIText
+mixin SectionHeader()
+	-
+		setDefaultValues(attributes, {
+			"fill": "char_stats_title.tga",
+			"fillstyle": "stretch",
+			"indent": 15,
+		})
+		let [paneAttrs, frameAttr, textAtrs] = splitAttributes(attributes, [
+			["x", "y", "width", "height"],
+			["fill", "fillstyle"],
+			[],
+		], 2)
+
+	UIPane(x=attributes.x y=attributes.y width=attributes.width height=attributes.height ignoreevents="true")&attributes(paneAttrs)
+		UIText(
+			width="PARENT_WIDTH" height="PARENT_HEIGHT"
+			valign="middle"
+		)&attributes(textAtrs)
+		UIFrame(fill=attributes.fill fillstyle=attributes.fillstyle)&attributes(frameAttr)
+
+//- Scrollable view that can contain any number of children.
+//- Multiple children can automatically stacked inside a +Scrollable without setting the y value. This is especially useful with +Collapsable children.
+//-
+//- Notes:
+//-   by default the scroll takes around 5 pixels in width. Be sure to size the children accordingly !
+//-   A special sbstyle STYLE_MODERN has been added to provide a 3-pixel thin scrollbar
+//-
+//- Attributes:
+//-   x, y, width, height: size and position of scrollable container
+//-   sbstyle: passed as the UIScrollBar style attribute. Defaults to "STYLE_SB_ULTRA_THIN"
+//-   Additional attributes are forwarded to the UIListbox
+mixin Scrollable()
+	-
+		setDefaultValues(attributes, {
+			"unequalcontrols": "true",
+			"scrollsegmentsize": 16,
+			"sbstyle": "STYLE_SB_ULTRA_THIN",
+		})
+		let sbstyle = attributes.sbstyle
+		delete attributes.sbstyle
+
+	UIListbox(capturemouseclicks="false")&attributes(attributes)
+		block
+		if sbstyle == "STYLE_MODERN"
+			UIScrollBar(width=3 height="PARENT_HEIGHT")
+				UIButton(name="up")
+				UIButton(name="down")
+				UIButton(name="slider" height=25)
+					UIFrame(state="up"       fill="selection_fill2.tga" alpha="0.7")
+					UIFrame(state="down"     fill="selection_fill2.tga")
+					UIFrame(state="focused"  fill="selection_fill2.tga" alpha="0.7")
+					UIFrame(state="hilited"  fill="selection_fill2.tga")
+					UIFrame(state="hifocus"  fill="selection_fill2.tga")
+					UIFrame(state="disabled" fill="selection_fill2.tga")
+				UIButton(name="back" height="PARENT_HEIGHT" dontrendermousegrab="true" OnLeftClick="UIScrollBar_Input_JumpSlider()")
+					UIFrame(state="up"       fill="selection_fill2.tga" alpha="0.15")
+					UIFrame(state="down"     fill="selection_fill2.tga" alpha="0.3")
+					UIFrame(state="focused"  fill="selection_fill2.tga" alpha="0.15")
+					UIFrame(state="hilited"  fill="selection_fill2.tga" alpha="0.3")
+					UIFrame(state="hifocus"  fill="selection_fill2.tga" alpha="0.3")
+					UIFrame(state="disabled" fill="selection_fill2.tga" alpha="0.3")
+		else
+			UIScrollBar(style!=sbstyle)
+
+
+//- Scrollable view containing a UIText with a dynamic height (will expand when text is added)
+//-
+//- Attributes:
+//-   x, y, width, height: size and position of scrollable container
+//-   snaptobottom, scrollbaronright, hidescrollbarwhennotneeded, hidescrollbar, sbstyle: forwarded to the +Scrollable
+//-   Additional attributes are forwarded to the inner UIText
+mixin ScrollableText()
+	-
+		let [scrAttrs, txtAttrs] = splitAttributes(attributes, [
+			["x", "y", "width", "height", "snaptobottom", "scrollbaronright", "hidescrollbarwhennotneeded", "hidescrollbar", "sbstyle"],
+			[],
+		], 1)
+
+	+Scrollable()&attributes(scrAttrs)
+		UIText(width=attributes.width - 5 height="DYNAMIC")&attributes(txtAttrs)
+
+
+//- Scrollable view containing a UIText with a dynamic height (will expand when text is added)
+//-
+//- Notes:
+//-   Inner content height will be height - header_height.
+//-
+//- Attributes:
+//-   x, y, width, height, isexpanded, collapselock, indent, xPadding, yPadding: forwarded to the UICollapsable
+//-   closed: image when the collapsable is closed (with the + icon). Defaults to "b_qj_pressed.tga"
+//-   closed_hilighted: image when the collapsable is closed (with the + icon) and hovered. Defaults to "b_qj_hover_pressed.tga"
+//-   expanded: image when the collapsable is expanded (with the - icon). Defaults to "b_qj_normal.tga"
+//-   expanded_hilighted: image when the collapsable is expanded (with the - icon) and hovered. Defaults to "b_qj_hover.tga"
+//-   header_height: passed as the height attribute of the collapsable header's +CustomButton. Defaults to 20
+//-   Additional attributes are forwarded to the collapsable header's +CustomButton
+mixin Collapsable()
+	-
+		setDefaultValues(attributes, {
+			"indent": 25,
+			"header_height": 20,
+		})
+		let [collAttrs, btnAttrs, specAttrs] = splitAttributes(attributes, [
+			["x", "y", "width", "height", "isexpanded", "collapselock", "indent", "xPadding", "yPadding"],
+			[],
+			["closed", "closed_hilighted", "expanded_hilighted", "closed"],
+		], 1)
+
+		btnAttrs.released = specAttrs.closed != undefined? specAttrs.closed : "b_qj_pressed.tga"
+		btnAttrs.released_hilighted = specAttrs.closed_hilighted != undefined? specAttrs.closed_hilighted : "b_qj_hover_pressed.tga"
+		btnAttrs.pressed = specAttrs.expanded != undefined? specAttrs.expanded : "b_qj_normal.tga"
+		btnAttrs.pressed_hilighted = specAttrs.expanded_hilighted != undefined? specAttrs.expanded_hilighted : "b_qj_hover.tga"
+		btnAttrs.height = specAttrs.header_height != undefined? specAttrs.header_height : 20
+
+	UICollapsable()&attributes(collAttrs)
+		+CustomButton(
+			width="PARENT_WIDTH" height=attributes.header_height
+			header="true"
+		)&attributes(btnAttrs)
+		block

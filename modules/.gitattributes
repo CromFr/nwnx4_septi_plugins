@@ -1,0 +1,31 @@
+#Areas
+*.[aA][rR][eE] diff=gff merge=gff
+*.[gG][iI][cC] diff=gff merge=gff
+*.[gG][iI][tT] diff=gff merge=gff
+*.[tT][rR][nN] diff=trn merge=trn
+*.[tT][rR][xX] diff=trn merge=trn
+
+#Dialogs
+*.[dD][lL][gG] diff=gff merge=gff
+
+#Module
+*.[fF][aA][cC] diff=gff merge=gff
+*.[iI][fF][oO] diff=gff merge=gff
+*.[jJ][rR][lL] diff=gff merge=gff
+
+#Blueprints
+*.[uU][lL][tT] diff=gff merge=gff
+*.[uU][pP][eE] diff=gff merge=gff
+*.[uU][tT][cC] diff=gff merge=gff
+*.[uU][tT][dD] diff=gff merge=gff
+*.[uU][tT][eE] diff=gff merge=gff
+*.[uU][tT][iI] diff=gff merge=gff
+*.[uU][tT][mM] diff=gff merge=gff
+*.[uU][tT][pP] diff=gff merge=gff
+*.[uU][tT][rR] diff=gff merge=gff
+*.[uU][tT][tT] diff=gff merge=gff
+*.[uU][tT][wW] diff=gff merge=gff
+
+#Others
+*.[pP][fF][bB] diff=gff merge=gff
+*.[gG][fF][fF] diff=gff merge=gff

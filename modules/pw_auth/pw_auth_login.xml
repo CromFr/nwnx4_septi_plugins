@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- - var type = "register"-->
+<!-- - var type = "login"-->
+<UIScene name="SCREEN_PW_AUTH_LOGIN" width="SCREEN_WIDTH" height="SCREEN_HEIGHT" scriptloadable="true" priority="SCENE_INGAME_FULLSCREEN" fullscreen="true" fadeout="0.0" fadein="0.0" backoutkey="true" OnBackout="UIButton_Input_ExitToMainMenu()"></UIScene>
+<UIPane width="371" height="338" capturemouseclicks="false" x="ALIGN_CENTER" y="ALIGN_CENTER">
+  <UIPane x="15" y="23" width="340" height="300" capturemouseclicks="false">
+    <UIPane x="15" y="0" width="310" height="285">
+      <UItext text="Login" y="ALIGN_TOP" height="28" align="left" valign="middle" fontfamily="Title_Font" style="4"></UItext>
+      <UItext name="SERVERNAME" y="30" height="42" align="center" valign="middle" fontfamily="Title_Font" style="4"></UItext>
+      <!-- Account-->
+      <UIPane height="20" capturemouseclicks="false" y="90" width="310">
+        <UIText width="80" height="PARENT_HEIGHT" ignoreevents="true" align="left" valign="middle" text="Account:"></UIText>
+        <UIPane x="80" width="230" height="PARENT_HEIGHT" capturemouseclicks="false">
+          <UIPane capturemouseclicks="false" width="230" height="20">
+            <UIPane x="3" y="3" width="224" height="14" capturemouseclicks="false">
+              <UIText width="PARENT_WIDTH" height="PARENT_HEIGHT" align="center" valign="middle" fontfamily="International" multiline="false" maxlength="24" returnrestricted="true" editable="false" selectable="true" OnToolTip="UIObject_Tooltip_DisplayTooltipString(&quot;Bioware and server account name&quot;,OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_2,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)" name="ACCOUNT" nextcontrol="PASSWORD" allowpunc="true" allowspace="true"></UIText>
+            </UIPane>
+            <UIFrame topleft="tp_frame_tl.tga" topright="tp_frame_tr.tga" bottomleft="tp_frame_bl.tga" bottomright="tp_frame_BR.tga" top="tp_frame_t.tga" bottom="tp_frame_b.tga" left="tp_frame_l.tga" right="tp_frame_r.tga" fillstyle="stretch" fill="tp_frame_bg.tga" border="5"></UIFrame>
+          </UIPane>
+        </UIPane>
+      </UIPane>
+      <!-- Password-->
+      <UIPane height="20" capturemouseclicks="false" y="125" width="310">
+        <UIText width="80" height="PARENT_HEIGHT" ignoreevents="true" align="left" valign="middle" text="Password:"></UIText>
+        <UIPane x="80" width="230" height="PARENT_HEIGHT" capturemouseclicks="false">
+          <UIPane capturemouseclicks="false" width="230" height="20">
+            <UIPane x="3" y="3" width="224" height="14" capturemouseclicks="false">
+              <UIText width="PARENT_WIDTH" height="PARENT_HEIGHT" align="center" valign="middle" fontfamily="International" multiline="false" maxlength="24" returnrestricted="true" editable="true" selectable="true" update="true" OnUpdate="UIObject_Misc_SetLocalVarString(local:42)" OnToolTip="UIObject_Tooltip_DisplayTooltipString(&quot;Your password for logging into this server. This is not related with any Bioware account password&quot;,OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_2,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)" name="PASSWORD" password="true" nextcontrol="REMEMBER" allowpunc="true" allowspace="true"></UIText>
+            </UIPane>
+            <UIFrame topleft="tp_frame_tl.tga" topright="tp_frame_tr.tga" bottomleft="tp_frame_bl.tga" bottomright="tp_frame_BR.tga" top="tp_frame_t.tga" bottom="tp_frame_b.tga" left="tp_frame_l.tga" right="tp_frame_r.tga" fillstyle="stretch" fill="tp_frame_bg.tga" border="5"></UIFrame>
+          </UIPane>
+        </UIPane>
+      </UIPane>
+      <!-- Remember me-->
+      <UIPane height="20" capturemouseclicks="false" y="160" width="310">
+        <UIText width="80" height="PARENT_HEIGHT" ignoreevents="true" align="left" valign="middle" name="REMEMBER" text="Remember" prevcontrol="PASSWORD" nextcontrol="OK_BUTTON"></UIText>
+        <UIPane x="80" width="230" height="PARENT_HEIGHT" capturemouseclicks="false">
+          <UIButton style="SQUARE_CHECKBOX_BUTTON" OnSelected="UIObject_Misc_SetLocalVarString(local:44,1)" OnUnselected="UIObject_Misc_SetLocalVarString(local:44,0)" OnTooltip="UIObject_Tooltip_DisplayTooltipString(&quot;Remember IP and CDKey to skip login next time you connect to this server&quot;,OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_1,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)"></UIButton>
+        </UIPane>
+      </UIPane>
+      <!-- Buttons-->
+      <UIPane x="ALIGN_CENTER" y="ALIGN_BOTTOM" height="30" width="290">
+        <UIButton name="OK_BUTTON" x="ALIGN_LEFT" y="ALIGN_BOTTOM" text="Login" style="STYLE_SMALL_BUTTON" color="gold" OnLeftClick="UIObject_Misc_ExecuteServerScript('gui_pw_auth_login','login',local:42,local:44)"></UIButton>
+        <UIButton MouseUpSFX="gui_button" released="b_lgr_normal.tga" released_hilighted="b_lgr_hover.tga" pressed="b_lgr_pressed.tga" pressed_hilighted="b_lgr_hover_pressed.tga" text="Exit" x="ALIGN_RIGHT" y="ALIGN_BOTTOM" width="124" height="28" OnLeftClick="UIButton_Input_ExitToMainMenu()">
+          <UIText style="1" align="center" valign="middle" fontfamily="Title_Font"></UIText>
+          <UIFrame state="up" fill="b_lgr_normal.tga"></UIFrame>
+          <UIFrame state="focused" fill="b_lgr_normal.tga"></UIFrame>
+          <UIFrame state="disabled" fill="b_lgr_normal.tga"></UIFrame>
+          <UIFrame state="hilited" fill="b_lgr_hover.tga"></UIFrame>
+          <UIFrame state="down" fill="b_lgr_pressed.tga"></UIFrame>
+          <UIFrame state="hifocus" fill="b_lgr_hover_pressed.tga"></UIFrame>
+        </UIButton>
+      </UIPane>
+    </UIPane>
+    <UIFrame fill="store_top_bg.tga" fillstyle="stretch" y="ALIGN_TOP" height="90"></UIFrame>
+    <UIFrame fill="store_bottom_bg.tga" fillstyle="stretch" y="ALIGN_BOTTOM" height="75" color="BBBBBB"></UIFrame>
+  </UIPane>
+  <UIFrame x="15" y="23" width="340" height="300" fill="cloth_bg.tga" fillstyle="tile"></UIFrame>
+  <UIFrame topleft="frame_main_d_TL.tga" topright="frame_main_t_TR.tga" bottomleft="frame_main_d_BL.tga" bottomright="frame_main_d_BR.tga" top="frame_main_T.tga" bottom="frame_main_B.tga" left="frame_main_L.tga" right="frame_main_R.tga" border="45"></UIFrame>
+</UIPane>
+<!-- Signature-->
+<UIPane x="ALIGN_RIGHT" y="ALIGN_BOTTOM" width="557" height="30" capturemouseclicks="false">
+  <UIIcon img="ia_lock.tga" x="ALIGN_RIGHT" width="30" ignoreevents="true"></UIIcon>
+  <UIText text="Heimdall PW Auth by Septirage and Crom" x="ALIGN_LEFT" width="512" fontfamily="Title_Font" style="4" align="right" valign="middle" ignoreevents="true"></UIText>
+  <UIButton OnLeftClick="UIButton_Input_OpenURL(&quot;github.com/Septirage/nwnx4_septi_plugins&quot;)"></UIButton>
+</UIPane>
+<!-- Top bar-->
+<UIFrame fill="frame1_T.tga" fillstyle="stretch" y="93" height="32" scalewithscene="true"></UIFrame>
+<UIFrame fill="frame_main_bg.tga" fillstyle="tile" alpha="0.7" y="0" height="100" scalewithscene="true"></UIFrame>
+<UIFrame fill="cloth_bg.tga" fillstyle="tile" y="0" height="100" scalewithscene="true"></UIFrame>
+<!-- Bot bar-->
+<UIFrame fill="frame1_B.tga" fillstyle="stretch" y="643" height="32" scalewithscene="true"></UIFrame>
+<UIFrame fill="frame_main_bg.tga" fillstyle="tile" alpha="0.7" y="ALIGN_BOTTOM" height="100" scalewithscene="true"></UIFrame>
+<UIFrame fill="cloth_bg.tga" fillstyle="tile" y="ALIGN_BOTTOM" height="100" scalewithscene="true"></UIFrame>
+<!-- Fancy decoration-->
+<UIFrame fill="ls_scroll_left.tga" fillstyle="stretch" x="ALIGN_RIGHT" y="539.5" width="111" height="128.5" scalewithscene="true"></UIFrame>
+<!-- Background image-->
+<UIFrame name="BACKGROUND" fill="ls_background.tga" x="ALIGN_CENTER" y="ALIGN_CENTER" width="1024" height="568" scalewithscene="true"></UIFrame>

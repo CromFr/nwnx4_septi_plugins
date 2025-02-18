@@ -1,0 +1,121 @@
+doctype xml
+- locale = "fr";
+include nwn2-widget-lib.pug
+
+// - var type = "register"
+// - var type = "login"
+
+-
+  var loc = {
+    "serv_name": "a NWN2 Server",
+    "title": "Welcome",
+    "account": "Account:",
+    "account_tooltip": "Bioware and server account name",
+    "password": "Password:",
+    "password_tooltip": "Your password for logging into this server. This is not related with any Bioware account password",
+    "confirmpassword": "Confirm pass.:",
+    "confirmpassword_tooltip": "Type again your password",
+    "login": "Login",
+    "register": "Register",
+    "exit": "Exit",
+    "remember": "Remember",
+    "remember_tooltip": "Remember IP and CDKey to skip login next time you connect to this server",
+  }
+  var loginCallback = "gui_pw_auth_login"
+  var registerCallback = "gui_pw_auth_register"
+
+-
+  var fullscreenSize = [1024, 768]
+  var barsHeight = 100
+  var panelSize = [340, 300]
+  var panelPadding = 15
+
+  var flow = []
+  if(type == "login")
+    flow = ["ACCOUNT", "PASSWORD", "REMEMBER"]
+  else if(type == "register")
+    flow = ["ACCOUNT", "PASSWORD", "PASSWORDCONF"]
+  else
+    throw "unknown GUI type: '" + type + "'"
+
+UIScene(name='SCREEN_PW_AUTH_' + type.toUpperCase() width='SCREEN_WIDTH' height='SCREEN_HEIGHT' scriptloadable='true' priority='SCENE_INGAME_FULLSCREEN' fullscreen='true' fadeout='0.0' fadein='0.0'
+        backoutkey="true" OnBackout='UIButton_Input_ExitToMainMenu()')
+
+
++FancyFramedPane(x='ALIGN_CENTER' y='ALIGN_CENTER' width=panelSize[0] height=panelSize[1])
+
+  UIPane(x=panelPadding y=0 width=panelSize[0] - 2* panelPadding height=panelSize[1] - panelPadding)
+    //- inner content
+    - let title = type == "login" ? loc["login"] : loc["register"]
+    UItext(text=title y="ALIGN_TOP" height=28 align="left" valign="middle" fontfamily="Title_Font" style='4')
+    
+    UItext(name="SERVERNAME" y=30 height=42 align="center" valign="middle" fontfamily="Title_Font" style='4')
+    - let startY = 90
+    - let spacing = 35
+
+    for f, i in flow
+      -
+        let prev = i > 0 ? flow[i - 1] : undefined
+        if(prev == "ACCOUNT") prev = undefined;
+        let next = i + 1 < flow.length ? flow[i + 1] : "OK_BUTTON"
+      case f
+        when "ACCOUNT"
+          // Account
+          +LabeledTextInput(name=f label=loc["account"] y=startY + spacing * i width=panelSize[0] - 2 * panelPadding editable="false"
+                            prevcontrol=prev nextcontrol=next
+                            tooltip=loc["account_tooltip"])
+        when "PASSWORD"
+          // Password
+          +LabeledTextInput(name=f label=loc["password"] y=startY + spacing * i width=panelSize[0] - 2 * panelPadding variable="local:42" password="true"
+                            prevcontrol=prev nextcontrol=next
+                            tooltip=loc["password_tooltip"])
+        when "PASSWORDCONF"
+          // Password confirmation
+          +LabeledTextInput(name=f label=loc["confirmpassword"] y=startY + spacing * i width=panelSize[0] - 2 * panelPadding variable="local:43" password="true"
+                            prevcontrol=prev nextcontrol=next
+                            tooltip=loc["confirmpassword_tooltip"])
+        when "REMEMBER"
+          // Remember me
+          +LabeledPane(name=f text=loc["remember"] y=startY + spacing * i width=panelSize[0] - 2 * panelPadding
+                       prevcontrol=prev nextcontrol=next)
+            UIButton(style="SQUARE_CHECKBOX_BUTTON"
+                     OnSelected='UIObject_Misc_SetLocalVarString(local:44,1)'
+                     OnUnselected='UIObject_Misc_SetLocalVarString(local:44,0)'
+                     OnTooltip='UIObject_Tooltip_DisplayTooltipString("' + loc["remember_tooltip"] + '",OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_1,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)')
+
+    // Buttons
+    UIPane(x="ALIGN_CENTER" y="ALIGN_BOTTOM" height=30 width=panelSize[0] - 50)
+      if type == "login"
+        UIButton(name='OK_BUTTON' x='ALIGN_LEFT' y='ALIGN_BOTTOM' text=loc["login"] style='STYLE_SMALL_BUTTON' color='gold'
+                 OnLeftClick="UIObject_Misc_ExecuteServerScript('" + loginCallback + "','login',local:42,local:44)")
+      else if type == "register"
+        UIButton(name='OK_BUTTON' x='ALIGN_LEFT' y='ALIGN_BOTTOM' text=loc["register"] style='STYLE_SMALL_BUTTON' color='gold'
+                 OnLeftClick="UIObject_Misc_ExecuteServerScript('" + registerCallback + "','register',local:42,local:43)")  
+      +CancelButton(x="ALIGN_RIGHT" y="ALIGN_BOTTOM" width=124 height=28 OnLeftClick='UIButton_Input_ExitToMainMenu()' text=loc["exit"])
+
+
+
+  UIFrame(fill='store_top_bg.tga' fillstyle='stretch' y="ALIGN_TOP" height=90)
+  UIFrame(fill='store_bottom_bg.tga' fillstyle='stretch' y="ALIGN_BOTTOM" height=75 color="BBBBBB")
+
+// Signature
+UIPane(x='ALIGN_RIGHT' y='ALIGN_BOTTOM' width=fullscreenSize[0] * 0.5 + 40 + 5 height=30 capturemouseclicks="false")
+  UIIcon(img='ia_lock.tga' x='ALIGN_RIGHT' width=30 ignoreevents="true")
+  UIText(text="Heimdall PW Auth by Septirage and Crom" x='ALIGN_LEFT' width=fullscreenSize[0] * 0.5 fontfamily='Title_Font' style='4' align='right' valign='middle' ignoreevents="true")
+  UIButton(OnLeftClick='UIButton_Input_OpenURL("github.com/Septirage/nwnx4_septi_plugins")')
+
+// Top bar
+UIFrame(fill='frame1_T.tga' fillstyle='stretch' y=barsHeight - 7 height='32' scalewithscene="true")
+UIFrame(fill='frame_main_bg.tga' fillstyle='tile' alpha='0.7' y='0' height=barsHeight scalewithscene="true")
+UIFrame(fill='cloth_bg.tga' fillstyle='tile' y='0' height=barsHeight scalewithscene="true")
+
+// Bot bar
+UIFrame(fill='frame1_B.tga' fillstyle='stretch' y=fullscreenSize[1] - barsHeight - 32 + 7 height='32' scalewithscene="true")
+UIFrame(fill='frame_main_bg.tga' fillstyle='tile' alpha='0.7' y='ALIGN_BOTTOM' height=barsHeight scalewithscene="true")
+UIFrame(fill='cloth_bg.tga' fillstyle='tile' y='ALIGN_BOTTOM' height=barsHeight scalewithscene="true")
+
+// Fancy decoration
+UIFrame(fill='ls_scroll_left.tga' fillstyle='stretch' x="ALIGN_RIGHT" y=fullscreenSize[1] - barsHeight - 257 * 0.5 width=222 * 0.5 height=257 * 0.5 scalewithscene="true")
+
+// Background image
+UIFrame(name='BACKGROUND' fill='ls_background.tga' x='ALIGN_CENTER' y='ALIGN_CENTER' width=fullscreenSize[0] height=fullscreenSize[1] - 2 * barsHeight scalewithscene="true")
