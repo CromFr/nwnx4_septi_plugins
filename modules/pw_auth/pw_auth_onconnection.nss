@@ -2,11 +2,16 @@
 
 
 int StartingConditional(string sPlayerName, string sIP, string sCDKey, int iPrivileges){
-	WriteTimestampedLogEntry("pw_auth: OnConnection " + sPlayerName + " ip=" + sIP + " cdkey=" + sCDKey + " priv=" + IntToString(iPrivileges));
+	object oModule = GetModule();
 
-	if(GetLocalInt(GetModule(), "pw_auth_retries_" + sPlayerName + "@" + sIP) >= PWAUTH_SECURITY_BADPASSWORD_RETRIES){
+	if(GetLocalInt(oModule, "pw_auth_init") == FALSE){
+		PWAuth_ModuleInit();
+		SetLocalInt(oModule, "pw_auth_init", TRUE);
+	}
+
+	if(GetLocalInt(oModule, "pw_auth_retries_" + sPlayerName + "@" + sIP) >= PWAUTH_SECURITY_BADPASSWORD_RETRIES){
 		// Too many failed login attempts
-		PwAuth_OpenKickGUI(sPlayerName, sIP, sCDKey, iPrivileges, PWAUTH_MSG_LOGINBLOCKED);
+		PwAuth_OpenMsgGUI(sPlayerName, sIP, sCDKey, iPrivileges, PWAUTH_MSG_LOGINBLOCKED);
 		return XPMSGSRV_HEIMDALL_RET_KICK;
 	}
 
@@ -22,7 +27,7 @@ int StartingConditional(string sPlayerName, string sIP, string sCDKey, int iPriv
 			// Check account policy and kick if unacceptable
 			string sErr = PwAuth_CheckAccountPolicy(sPlayerName, sIP, sCDKey, iPrivileges);
 			if(sErr != ""){
-				PwAuth_OpenKickGUI(sPlayerName, sIP, sCDKey, iPrivileges, sErr);
+				PwAuth_OpenMsgGUI(sPlayerName, sIP, sCDKey, iPrivileges, sErr);
 				return XPMSGSRV_HEIMDALL_RET_KICK;
 			}
 			
@@ -32,7 +37,7 @@ int StartingConditional(string sPlayerName, string sIP, string sCDKey, int iPriv
 		}
 		else {
 			// Kick the player and ask to register elsewhere
-			PwAuth_OpenKickGUI(sPlayerName, sIP, sCDKey, iPrivileges, PWAUTH_MSG_KICK_NEEDREGISTRATION);
+			PwAuth_OpenMsgGUI(sPlayerName, sIP, sCDKey, iPrivileges, PWAUTH_MSG_KICK_NEEDREGISTRATION);
 			return XPMSGSRV_HEIMDALL_RET_KICK;
 		}
 	}
@@ -40,7 +45,7 @@ int StartingConditional(string sPlayerName, string sIP, string sCDKey, int iPriv
 	if(sKnownAccountName != sPlayerName){
 		// Account case issue: kick the player and require to connect with correct account
 		string sMsg = ReplaceTokens(PWAUTH_MSG_KICK_BADCASE, "{{CORRECT_ACCOUNT}}", sKnownAccountName);
-		PwAuth_OpenKickGUI(sPlayerName, sIP, sCDKey, iPrivileges, sMsg);
+		PwAuth_OpenMsgGUI(sPlayerName, sIP, sCDKey, iPrivileges, sMsg);
 		return XPMSGSRV_HEIMDALL_RET_KICK;
 	}
 

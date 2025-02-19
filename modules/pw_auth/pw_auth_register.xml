@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- - var type = "register"-->
-<!-- - var type = "login"-->
 <UIScene name="SCREEN_PW_AUTH_REGISTER" width="SCREEN_WIDTH" height="SCREEN_HEIGHT" scriptloadable="true" priority="SCENE_INGAME_FULLSCREEN" fullscreen="true" fadeout="0.0" fadein="0.0" backoutkey="true" OnBackout="UIButton_Input_ExitToMainMenu()"></UIScene>
 <UIPane width="371" height="338" capturemouseclicks="false" x="ALIGN_CENTER" y="ALIGN_CENTER">
   <UIPane x="15" y="23" width="340" height="300" capturemouseclicks="false">

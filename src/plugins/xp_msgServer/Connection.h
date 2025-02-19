@@ -109,6 +109,7 @@ class MsgServ final : public Plugin
 		};
 
 		bool enabled;
+		bool strict;
 
 		std::string onConnectionScript;
 
@@ -119,21 +120,6 @@ class MsgServ final : public Plugin
 
 		std::unordered_set<unsigned long> authorizedPlayerIDs;
 	} m_heimdall;
-
-	// bool isScriptExecAllowed(const std::string_view& accountName, const std::string_view& script){
-	// 	if(const auto aut = m_heimdall.authorizations.find(accountName); aut != m_heimdall.authorizations.end()){
-	// 		if (const auto val = std::get_if<bool>(&aut)){
-	// 			return *val;
-	// 		} else {
-	// 			return std::get<std::unordered_set>(aut).contains(script);
-	// 		}
-	// 	} else {
-	// 		return false;
-	// 	}
-	// }
-
-	// void NWNX_SetAuthorizedGUIScript(const std::string_view& scriptName);
-	// void NWNX_SetAuthorized(bool allowed);
 
 	void NWNX_SetAuthorizedGUIScript(const std::string_view& scriptName);
 	void NWNX_DisplayGUIScreen(const std::string_view& sceneName, const std::string_view& xmlName);

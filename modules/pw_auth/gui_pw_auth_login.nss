@@ -37,8 +37,8 @@ int StartingConditional(string sPlayerName, string sIP, string sCDKey, int iPriv
 
 	// Kick if too many failed attempts
 	if(nTries >= PWAUTH_SECURITY_BADPASSWORD_RETRIES){
-		PwAuth_OpenKickGUI(sPlayerName, sIP, sCDKey, iPrivileges, PWAUTH_MSG_LOGINBLOCKED);
-		return XPMSGSRV_HEIMDALL_RET_KICK;
+		PwAuth_OpenMsgGUI(sPlayerName, sIP, sCDKey, iPrivileges, PWAUTH_MSG_LOGINBLOCKED);
+		return XPMSGSRV_HEIMDALL_RET_WAIT;
 	}
 
 	// Display login failed message

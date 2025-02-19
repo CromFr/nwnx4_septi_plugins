@@ -2,8 +2,8 @@ doctype xml
 - locale = "fr";
 include nwn2-widget-lib.pug
 
-// - var type = "register"
-// - var type = "login"
+//- var type = "register"
+//- var type = "login"
 
 -
   var loc = {
@@ -76,12 +76,13 @@ UIScene(name='SCREEN_PW_AUTH_' + type.toUpperCase() width='SCREEN_WIDTH' height=
                             tooltip=loc["confirmpassword_tooltip"])
         when "REMEMBER"
           // Remember me
-          +LabeledPane(name=f text=loc["remember"] y=startY + spacing * i width=panelSize[0] - 2 * panelPadding
-                       prevcontrol=prev nextcontrol=next)
-            UIButton(style="SQUARE_CHECKBOX_BUTTON"
-                     OnSelected='UIObject_Misc_SetLocalVarString(local:44,1)'
-                     OnUnselected='UIObject_Misc_SetLocalVarString(local:44,0)'
-                     OnTooltip='UIObject_Tooltip_DisplayTooltipString("' + loc["remember_tooltip"] + '",OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_1,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)')
+          UIPane(name="REMEMBER_PANE" y=startY + spacing * i width=panelSize[0] - 2 * panelPadding height=20)
+            +LabeledPane(name=f text=loc["remember"] width=panelSize[0] - 2 * panelPadding
+                         prevcontrol=prev nextcontrol=next)
+              UIButton(style="SQUARE_CHECKBOX_BUTTON"
+                       OnSelected='UIObject_Misc_SetLocalVarString(local:44,1)'
+                       OnUnselected='UIObject_Misc_SetLocalVarString(local:44,0)'
+                       OnTooltip='UIObject_Tooltip_DisplayTooltipString("' + loc["remember_tooltip"] + '",OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_1,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)')
 
     // Buttons
     UIPane(x="ALIGN_CENTER" y="ALIGN_BOTTOM" height=30 width=panelSize[0] - 50)

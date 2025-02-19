@@ -222,29 +222,29 @@ int GetPlayerPrivileges(int playerid)
 
 
 
-// std::string formatMessage(const std::span<const uint8_t>& message)
-// {
-// 	std::string sResult = "";
-// 	char buffer[3];
-// 	for (size_t i = 0; i < message.size(); ++i) {
-// 		sprintf(buffer, "%02X ", message[i]);
-// 		sResult += buffer;
-// 	}
-// 	return sResult;
-// }
+static std::string formatMessage(const std::span<const uint8_t>& message)
+{
+	std::string sResult = "";
+	char buffer[3];
+	for (size_t i = 0; i < message.size(); ++i) {
+		sprintf(buffer, "%02X ", message[i]);
+		sResult += buffer;
+	}
+	return sResult;
+}
 
 
 void SendOpenGUI(unsigned long playerID, const std::string_view& sceneName, const std::string_view& xmlFileName){
 	uint32_t msgDataSize = 3 + 4 + 4 + sceneName.size() + 4 + xmlFileName.size();
-	auto msgData = ByteArray{msgDataSize + 1};
+	auto msgData = ByteWriter{msgDataSize + 1};
 
-	msgData.extend({0x50, 0x24, 0x04});
-	msgData.extend((uint32_t)msgDataSize);
-	msgData.extend((uint32_t)sceneName.size());
-	msgData.extend(sceneName);
-	msgData.extend((uint32_t)xmlFileName.size());
-	msgData.extend(xmlFileName);
-	msgData.extend({0xB3});
+	msgData.write({0x50, 0x24, 0x04});
+	msgData.write((uint32_t)msgDataSize);
+	msgData.write((uint32_t)sceneName.size());
+	msgData.write(sceneName);
+	msgData.write((uint32_t)xmlFileName.size());
+	msgData.write(xmlFileName);
+	msgData.write({0xB3});
 
 	// const auto msgStr = formatMessage(msgData.data);
 	// logger->Trace("%s: %s", __FUNCTION__, msgStr.c_str());
@@ -252,13 +252,13 @@ void SendOpenGUI(unsigned long playerID, const std::string_view& sceneName, cons
 }
 void SendCloseGUI(unsigned long playerID, const std::string_view& sceneName){
 	uint32_t msgDataSize = 3 + 4 + 4 + sceneName.size();
-	auto msgData = ByteArray{msgDataSize + 1};
+	auto msgData = ByteWriter{msgDataSize + 1};
 
-	msgData.extend({0x50, 0x24, 0x07});
-	msgData.extend((uint32_t)msgDataSize);
-	msgData.extend((uint32_t)sceneName.size());
-	msgData.extend(sceneName);
-	msgData.extend({0x73});
+	msgData.write({0x50, 0x24, 0x07});
+	msgData.write((uint32_t)msgDataSize);
+	msgData.write((uint32_t)sceneName.size());
+	msgData.write(sceneName);
+	msgData.write({0x73});
 
 	// const auto msgStr = formatMessage(msgData.data);
 	// logger->Trace("%s: %s", __FUNCTION__, msgStr.c_str());
@@ -267,18 +267,18 @@ void SendCloseGUI(unsigned long playerID, const std::string_view& sceneName){
 
 void SendSetGUIObjectHidden(unsigned long playerID, const std::string_view& sceneName, const std::string_view& sUIObjectName, bool hidden){
 	uint32_t msgDataSize = 3 + 4 + 4 + sceneName.size() + 4 + sUIObjectName.size();
-	auto msgData = ByteArray{msgDataSize + 1};
+	auto msgData = ByteWriter{msgDataSize + 1};
 
-	msgData.extend({0x50, 0x24, 0x06});
-	msgData.extend((uint32_t)msgDataSize);
-	msgData.extend((uint32_t)sceneName.size());
-	msgData.extend(sceneName);
-	msgData.extend((uint32_t)sUIObjectName.size());
-	msgData.extend(sUIObjectName);
+	msgData.write({0x50, 0x24, 0x06});
+	msgData.write((uint32_t)msgDataSize);
+	msgData.write((uint32_t)sceneName.size());
+	msgData.write(sceneName);
+	msgData.write((uint32_t)sUIObjectName.size());
+	msgData.write(sUIObjectName);
 	if(hidden)
-		msgData.extend({0x97});
+		msgData.write({0x97});
 	else
-		msgData.extend({0x87});
+		msgData.write({0x87});
 
 
 	// const auto msgStr = formatMessage(msgData.data);
@@ -288,17 +288,17 @@ void SendSetGUIObjectHidden(unsigned long playerID, const std::string_view& scen
 
 void SendSetGuiObjectText(unsigned long playerID, const std::string_view& sceneName, const std::string_view& sUIObjectName, const std::string_view& sText){
 	uint32_t msgDataSize = 3 + 4 + 4 + sceneName.size() + 4 + sUIObjectName.size() + 4 + sText.size();
-	auto msgData = ByteArray{msgDataSize + 1};
+	auto msgData = ByteWriter{msgDataSize + 1};
 
-	msgData.extend({0x50, 0x24, 0x0A});
-	msgData.extend((uint32_t)msgDataSize);
-	msgData.extend((uint32_t)sceneName.size());
-	msgData.extend(sceneName);
-	msgData.extend((uint32_t)sUIObjectName.size());
-	msgData.extend(sUIObjectName);
-	msgData.extend((uint32_t)sText.size());
-	msgData.extend(sText);
-	msgData.extend({0x93});
+	msgData.write({0x50, 0x24, 0x0A});
+	msgData.write((uint32_t)msgDataSize);
+	msgData.write((uint32_t)sceneName.size());
+	msgData.write(sceneName);
+	msgData.write((uint32_t)sUIObjectName.size());
+	msgData.write(sUIObjectName);
+	msgData.write((uint32_t)sText.size());
+	msgData.write(sText);
+	msgData.write({0x93});
 
 	// const auto msgStr = formatMessage(msgData.data);
 	// logger->Trace("%s: %s", __FUNCTION__, msgStr.c_str());
@@ -338,7 +338,6 @@ BOOL __stdcall MsgServOnReceive(
 	auto data = std::span{(const uint8_t*)Data, Length};
 	try
 	{
-		logger->Err("Recv msg from playerid %lu", playerId);
 		const char* accountName = GetPlayerAccountName_(playerId);
 
 		//Only if we want to trace everything
@@ -385,10 +384,11 @@ BOOL __stdcall MsgServOnReceive(
 
 						g_msgServ->m_heimdall.currentPlayerInfo.reset();
 
+
 						if(!isExecScriptOk)
 						{
 							//Error on script, log and continue as not autoconnected.
-							logger->Err("Failed to execute Heimdall OnConnection Script (%s) params : %s, %s, %s, %d",
+							logger->Err("Failed to execute Heimdall OnConnection Script: %s(%s, %s, %s, %d)",
 								g_msgServ->m_heimdall.onConnectionScript.c_str(),
 								accountName,
 								currentIP_.c_str(),
@@ -397,7 +397,7 @@ BOOL __stdcall MsgServOnReceive(
 							);
 						}
 						else{
-							logger->Trace("Executed Heimdall OnConnection Script (%s) params : %s, %s, %s, %d, returned %d",
+							logger->Trace("Executed Heimdall OnConnection Script: %s(%s, %s, %s, %d), returned %d",
 								g_msgServ->m_heimdall.onConnectionScript.c_str(),
 								accountName,
 								currentIP_.c_str(),
@@ -418,7 +418,7 @@ BOOL __stdcall MsgServOnReceive(
 							return false;
 						default:
 							//Error on script, log and continue as not autoconnected.
-							logger->Err("Heimdall OnConnection Script (%s) returned error value %d. params : %s, %s, %s, %d",
+							logger->Err("Heimdall OnConnection Script (%s) returned unknown value %d. params : %s, %s, %s, %d",
 								g_msgServ->m_heimdall.onConnectionScript.c_str(),
 								scriptRes,
 								accountName,
@@ -432,40 +432,48 @@ BOOL __stdcall MsgServOnReceive(
 				}
 				// GUI script execution request
 				else if (data.size() >= 11 && data.subspan(1, 2) == std::initializer_list<uint8_t>{0x06, 0x30}){
-					const auto scriptNameLen = *(uint32_t*)&data[7];
-					const auto scriptName = std::string{(const char*)&data[11], scriptNameLen};
+
+					// Parse script name
+					auto reader = ByteReader{data.subspan(7)};
+					const auto scriptNameLen = reader.read<uint32_t>();
+					if(!scriptNameLen)
+						return false;
+					const auto scriptName = reader.read_string(*scriptNameLen);
+					if(!scriptName)
+						return false;
 
 					if(const auto match = g_msgServ->m_heimdall.authorizedGUIScripts.find(playerId)
-					   ; match != g_msgServ->m_heimdall.authorizedGUIScripts.cend() && match->second == scriptName){
+					   ; match != g_msgServ->m_heimdall.authorizedGUIScripts.cend() && match->second == *scriptName){
 
-					   	size_t offset = 11 + scriptNameLen;
-						if(data.size() < offset)
-							return FALSE;
-					   	uint8_t argsCount = data[offset];
-					   	offset += 1;
+						// Script is authorized
 
-					   	std::vector<std::string> extraStringArgs;
-						for(uint8_t i = 0 ; i < argsCount ; i++){
-							if(offset + 4 > data.size())
-								break;
-							const auto length = *(uint32_t*)&data[offset];
-							offset += 4;
-							if(offset + length > data.size())
-								break;
-							const auto value = std::string{(const char*)&data[offset], length};
-							offset += length;
+						// Parse additional script args
+						std::vector<std::string> extraStringArgs;
 
-							extraStringArgs.push_back(value);
+						const auto argsCount = reader.read<uint8_t>();
+						if(!argsCount)
+							return false;
+
+						for(uint8_t i = 0 ; i < *argsCount ; i++){
+							const auto length = reader.read<uint32_t>();
+							if(!length)
+								return false;
+							const auto value = reader.read_string(*length);
+							if(!value)
+								return false;
+
+							extraStringArgs.push_back(std::string{*value});
 						}
 
-						std::string currentIP_ = [&](){
+						const auto scriptNameStr = std::string{*scriptName};
+						const std::string currentIP_ = [&](){
 							sockaddr_in sin;
 							GetPlayerConnectionInfo_(playerId, &sin);
 							const auto ip = sin.sin_addr.s_addr;
 							return std::format("{}.{}.{}.{}", (ip>>24) & 0xFF, (ip>>16) & 0xFF, (ip>>8) & 0xFF, ip & 0xFF);
 						}();
-						std::string currentCdKey_ = GetCDKey(playerId);
-						int currentPlayerPriv_ = GetPlayerPrivileges(playerId);
+						const std::string currentCdKey_ = GetCDKey(playerId);
+						const int currentPlayerPriv_ = GetPlayerPrivileges(playerId);
 						bool isExecScriptOk = false;
 
 						g_msgServ->m_heimdall.currentPlayerInfo = {playerId, accountName};
@@ -487,14 +495,14 @@ BOOL __stdcall MsgServOnReceive(
 						if(logLevel >= LogLevel::trace){
 							logger->SetLogLevel(logLevel);
 						}
-						int scriptRes = NWScript::ExecuteScriptEnhanced(scriptName.c_str(), 0, true, &isExecScriptOk, true);
+						int scriptRes = NWScript::ExecuteScriptEnhanced(scriptNameStr.c_str(), 0, true, &isExecScriptOk, true);
 
 						g_msgServ->m_heimdall.currentPlayerInfo.reset();
 
 						if(!isExecScriptOk)
 						{
 							//Error on script, log and continue as not autoconnected.
-							logger->Err("Failed to execute Heimdall GUI Script (%s) params : %s, %s, %s, %d, +%d GUI args",
+							logger->Err("Failed to execute Heimdall GUI Script: %s(%s, %s, %s, %d, +%d GUI args)",
 								g_msgServ->m_heimdall.onConnectionScript.c_str(),
 								accountName,
 								currentIP_.c_str(),
@@ -504,7 +512,7 @@ BOOL __stdcall MsgServOnReceive(
 							);
 						}
 						else{
-							logger->Trace("Executed Heimdall GUI Script (%s) params : %s, %s, %s, %d, +%d GUI args, returned %d",
+							logger->Debug("Executed Heimdall GUI Script: %s(%s, %s, %s, %d, +%d GUI args), returned %d",
 								g_msgServ->m_heimdall.onConnectionScript.c_str(),
 								accountName,
 								currentIP_.c_str(),
@@ -524,10 +532,18 @@ BOOL __stdcall MsgServOnReceive(
 						case ScriptRet::WAIT:
 							break;
 						case ScriptRet::KICK:
+							logger->Err("Heimdall GUI Script (%s) returned value %d which is not allowed for GUI scripts. params : %s, %s, %s, %d, [redacted]",
+								g_msgServ->m_heimdall.onConnectionScript.c_str(),
+								scriptRes,
+								accountName,
+								currentIP_.c_str(),
+								currentCdKey_.c_str(),
+								currentPlayerPriv_
+							);
 							return false;
 						default:
 							//Error on script, log and continue as not autoconnected.
-							logger->Err("Heimdall GUI Script (%s) returned error value %d. params : %s, %s, %s, %d, [redacted]",
+							logger->Err("Heimdall GUI Script (%s) returned unknown value %d. params : %s, %s, %s, %d, [redacted]",
 								g_msgServ->m_heimdall.onConnectionScript.c_str(),
 								scriptRes,
 								accountName,
@@ -538,27 +554,59 @@ BOOL __stdcall MsgServOnReceive(
 							return false;
 						}
 
+						// We already executed the script
+						return false;
+
+					}
+					else{
+						logger->Warn("Player %s tried to execute non authorized script %.*s", accountName, scriptName->size(), scriptName->data());
+						return false;
 					}
 				}
 				else{
 					if(!g_msgServ->m_heimdall.authorizedPlayerIDs.contains(playerId)){
-						//CharList, never allow that without login
-						if (data[1] == 0x11)
-						{
-							return false;
-						}
-						else if (data[1] == 0x2)
-						{
-							unsigned char cSubType = data[2];
-							//Don't allow to create or load character
-							if (cSubType == 0x01 || cSubType == 0x02 || cSubType == 0x04 ||
-								cSubType == 0x0e || cSubType == 0x0f || cSubType == 0x11 ||
-								cSubType == 0x13)
-							{
-								return false;	
+
+						if(g_msgServ->m_heimdall.strict){
+
+							bool allowed = false;
+
+							if(data == std::initializer_list<uint8_t>{0x70, 0x01, 0x00})
+								allowed = true;
+							else if(data == std::initializer_list<uint8_t>{0x70, 0x02, 0x16})
+								allowed = true;
+
+							if(!allowed){
+								logger->Debug("Blocked message from %s: %s", accountName, formatMessage(data).c_str());
+								return false;
 							}
+
+						}
+						else{
+							//CharList, never allow that without login
+							if (data[1] == 0x11)
+							{
+								return false;
+							}
+							else if (data[1] == 0x2)
+							{
+								uint8_t cSubType = data[2];
+								//Don't allow to create or load character
+								if (cSubType == 0x01 || cSubType == 0x02 || cSubType == 0x04 ||
+									cSubType == 0x0e || cSubType == 0x0f || cSubType == 0x11 ||
+									cSubType == 0x13)
+								{
+									return false;
+								}
+							}
+
 						}
 					}
+				}
+			}
+			else{
+				if(g_msgServ->m_heimdall.strict && !g_msgServ->m_heimdall.authorizedPlayerIDs.contains(playerId)){
+					logger->Debug("Blocked malformed message from %s: %s", accountName, formatMessage(data).c_str());
+					return false;
 				}
 			}
 
@@ -653,9 +701,9 @@ MsgServ::Init(char* nwnxhome)
 	inifile.append(".ini");
 
 	std::string header = "NWNX MsgServ Plugin v"+version+"\n"
-	                     "(c) 2024 by Septirage\n"
-	                     "visit us at http://septirage.com/nwn2/ \n"
-	                     "visit nwnx project at http://www.nwnx.org\n";
+						 "(c) 2024 by Septirage\n"
+						 "visit us at http://septirage.com/nwn2/ \n"
+						 "visit nwnx project at http://www.nwnx.org\n";
 
 	logger = std::make_unique<LogNWNX>(logfile);
 	logger->Info(header.c_str());
@@ -683,6 +731,13 @@ MsgServ::Init(char* nwnxhome)
 		 logger->Debug("Authentication un-available (no script passed)");
 	 }
 
+	 config->Read<bool>("EnableStrictMessageBlocking", &m_heimdall.strict, false);
+	 if (m_heimdall.strict) {
+		 logger->Debug("EnableStrictMessageBlocking set to true.");
+	 }
+	 else {
+		 logger->Debug("EnableStrictMessageBlocking set to false.");
+	 }
 
 	 /*
 	#

@@ -9,8 +9,7 @@
 /// unknown account
 const int PWAUTH_ALLOW_REGISTRATION = TRUE;
 
-/// Set to TRUE to allow account registration when a player connects with an
-/// unknown account
+/// Set to TRUE to show a remember me checkbox to future login on the same IP + Account + CDKey
 const int PWAUTH_REMEMBER_BUTTON_SHOW = TRUE;
 
 /// Number of successive bad passwords during login before the IP/account is rate-limited.
@@ -58,6 +57,28 @@ const string PWAUTH_MSG_REGISTER_SUCCESS = "Account registered !";
 //==============================================================================
 //                           DATABASE INTERACTIONS
 //==============================================================================
+
+/// Called only once per module boot, to setup the database.
+void PWAuth_ModuleInit(){
+	SQLExecDirect(
+		"CREATE TABLE IF NOT EXISTS `pw_auth_accounts` ("
+		+"  `account_name` varchar(32) COLLATE utf8mb4_bin NOT NULL,"
+		+"  `password_hash` varchar(512) COLLATE utf8mb4_bin DEFAULT NULL,"
+		+"  `password_salt` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL,"
+		+"  PRIMARY KEY (`account_name`)"
+		+") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+	);
+	SQLExecDirect(
+		"CREATE TABLE IF NOT EXISTS `pw_auth_remembered` ("
+		+"  `account_name` varchar(32) COLLATE utf8mb4_bin NOT NULL,"
+		+"  `ip` varchar(15) COLLATE utf8mb4_bin NOT NULL,"
+		+"  `cdkey` varchar(16) COLLATE utf8mb4_bin NOT NULL,"
+		+"  PRIMARY KEY (`account_name`,`ip`,`cdkey`),"
+		+"  KEY `fk_pw_auth` (`account_name`),"
+		+"  CONSTRAINT `fk_pw_auth` FOREIGN KEY (`account_name`) REFERENCES `pw_auth_accounts` (`account_name`) ON DELETE CASCADE ON UPDATE CASCADE"
+		+") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+	);
+}
 
 /// Returns TRUE if the account is already registered and has been remembered
 /// on a previous login
@@ -209,19 +230,13 @@ string PwAuth_CheckPasswordPolicy(string sPlayerName, string sIP, string sCDKey,
 //                               GUI CUSTOMIZATION
 //==============================================================================
 
-// Custom Login GUI
+// Custom message box
 void PwAuth_OpenMsgGUI(string sPlayerName, string sIP, string sCDKey, int iPrivileges, string sMessage){
 	XPMsgSrv_Heimdall_DisplayGuiScreen("SCREEN_MESSAGEBOX_DEFAULT", "messageboxdefault.xml");
 	XPMsgSrv_Heimdall_SetGUIObjectText("SCREEN_MESSAGEBOX_DEFAULT", "messagetext", sMessage);
 }
 
-// Custom kick GUI
-void PwAuth_OpenKickGUI(string sPlayerName, string sIP, string sCDKey, int iPrivileges, string sMessage){
-	XPMsgSrv_Heimdall_DisplayGuiScreen("SCREEN_MESSAGEBOX_DEFAULT", "messageboxdefault.xml");
-	XPMsgSrv_Heimdall_SetGUIObjectText("SCREEN_MESSAGEBOX_DEFAULT", "messagetext", sMessage);
-}
-
-// Custom Login GUI
+// Custom login GUI
 const string PWAUTH_LOGIN_SCENENAME = "SCREEN_PW_AUTH_LOGIN";
 void PwAuth_OpenLoginGUI(string sPlayerName, string sIP, string sCDKey, int iPrivileges){
 	XPMsgSrv_Heimdall_SetAuthorizedGUIScript("gui_pw_auth_login");
@@ -229,6 +244,8 @@ void PwAuth_OpenLoginGUI(string sPlayerName, string sIP, string sCDKey, int iPri
 
 	XPMsgSrv_Heimdall_SetGUIObjectText(PWAUTH_LOGIN_SCENENAME, "SERVERNAME", PWAUTH_SERVERNAME);
 	XPMsgSrv_Heimdall_SetGUIObjectText(PWAUTH_LOGIN_SCENENAME, "ACCOUNT", sPlayerName);
+	if(!PWAUTH_REMEMBER_BUTTON_SHOW)
+		XPMsgSrv_Heimdall_SetGUIObjectHidden(PWAUTH_LOGIN_SCENENAME, "REMEMBER_PANE", TRUE);
 }
 
 // Custom registration GUI

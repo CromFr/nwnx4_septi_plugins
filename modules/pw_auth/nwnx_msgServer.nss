@@ -94,7 +94,7 @@ void XPMsgSrv_SetAntiCheatCreationSystem(int bActivated)
 const int XPMSGSRV_HEIMDALL_RET_WAIT  = 1;
 /// Allow player to enter the server. Return value used for OnConnection script and related GUI scripts
 const int XPMSGSRV_HEIMDALL_RET_ALLOW   = 2;
-/// Kick the player out of the server. Return value used for OnConnection script and related GUI scripts
+/// Kick the player out of the server. Return value used only for the OnConnection script
 const int XPMSGSRV_HEIMDALL_RET_KICK = 3;
 
 /// Allows a specific script to be executed by a non authenticated player. This

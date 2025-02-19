@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- - var type = "register"-->
-<!-- - var type = "login"-->
 <UIScene name="SCREEN_PW_AUTH_LOGIN" width="SCREEN_WIDTH" height="SCREEN_HEIGHT" scriptloadable="true" priority="SCENE_INGAME_FULLSCREEN" fullscreen="true" fadeout="0.0" fadein="0.0" backoutkey="true" OnBackout="UIButton_Input_ExitToMainMenu()"></UIScene>
 <UIPane width="371" height="338" capturemouseclicks="false" x="ALIGN_CENTER" y="ALIGN_CENTER">
   <UIPane x="15" y="23" width="340" height="300" capturemouseclicks="false">
@@ -32,10 +30,12 @@
         </UIPane>
       </UIPane>
       <!-- Remember me-->
-      <UIPane height="20" capturemouseclicks="false" y="160" width="310">
-        <UIText width="80" height="PARENT_HEIGHT" ignoreevents="true" align="left" valign="middle" name="REMEMBER" text="Remember" prevcontrol="PASSWORD" nextcontrol="OK_BUTTON"></UIText>
-        <UIPane x="80" width="230" height="PARENT_HEIGHT" capturemouseclicks="false">
-          <UIButton style="SQUARE_CHECKBOX_BUTTON" OnSelected="UIObject_Misc_SetLocalVarString(local:44,1)" OnUnselected="UIObject_Misc_SetLocalVarString(local:44,0)" OnTooltip="UIObject_Tooltip_DisplayTooltipString(&quot;Remember IP and CDKey to skip login next time you connect to this server&quot;,OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_1,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)"></UIButton>
+      <UIPane name="REMEMBER_PANE" y="160" width="310" height="20">
+        <UIPane height="20" capturemouseclicks="false" width="310">
+          <UIText width="80" height="PARENT_HEIGHT" ignoreevents="true" align="left" valign="middle" name="REMEMBER" text="Remember" prevcontrol="PASSWORD" nextcontrol="OK_BUTTON"></UIText>
+          <UIPane x="80" width="230" height="PARENT_HEIGHT" capturemouseclicks="false">
+            <UIButton style="SQUARE_CHECKBOX_BUTTON" OnSelected="UIObject_Misc_SetLocalVarString(local:44,1)" OnUnselected="UIObject_Misc_SetLocalVarString(local:44,0)" OnTooltip="UIObject_Tooltip_DisplayTooltipString(&quot;Remember IP and CDKey to skip login next time you connect to this server&quot;,OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_1,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)"></UIButton>
+          </UIPane>
         </UIPane>
       </UIPane>
       <!-- Buttons-->
