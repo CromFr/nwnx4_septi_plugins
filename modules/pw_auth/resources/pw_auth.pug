@@ -1,25 +1,45 @@
+//- Generate with -O "{type: 'login'}" or -O "{type: 'register'}"
+
 doctype xml
-- locale = "fr";
+- locale = "en";
 include nwn2-widget-lib.pug
 
-//- var type = "register"
-//- var type = "login"
-
 -
-  var loc = {
-    "serv_name": "a NWN2 Server",
-    "title": "Welcome",
-    "account": "Account:",
-    "account_tooltip": "Bioware and server account name",
-    "password": "Password:",
-    "password_tooltip": "Your password for logging into this server. This is not related with any Bioware account password",
-    "confirmpassword": "Confirm pass.:",
-    "confirmpassword_tooltip": "Type again your password",
-    "login": "Login",
-    "register": "Register",
-    "exit": "Exit",
-    "remember": "Remember",
-    "remember_tooltip": "Remember IP and CDKey to skip login next time you connect to this server",
+  switch(locale){
+    case "fr":
+      var loc = {
+        "serv_name": "Un Serveur NWN2",
+        "title": "Bienvenue",
+        "account": "Compte",
+        "account_tooltip": "Nom de compte Bioware et sur le serveur",
+        "password": "Mot de passe",
+        "password_tooltip": "Votre mot de passe pour entrer sur le serveur. Ce mot de passe n'est pas lié à votre éventuel compte Bioware",
+        "confirmpassword": "Confirmation",
+        "confirmpassword_tooltip": "Entrez à nouveau votre mot de passe",
+        "login": "Connexion",
+        "register": "S'enregistrer",
+        "exit": "Quitter",
+        "remember": "Retenir",
+        "remember_tooltip": "Se souvenir de l'IP et de la clé de CD afin de se connecter automatiquement la prochaine fois",
+      };
+      break;
+    default:
+      var loc = {
+        "serv_name": "a NWN2 Server",
+        "title": "Welcome",
+        "account": "Account:",
+        "account_tooltip": "Bioware and server account name",
+        "password": "Password:",
+        "password_tooltip": "Your password for logging into this server. This is not related with any Bioware account password",
+        "confirmpassword": "Confirm pass.:",
+        "confirmpassword_tooltip": "Type again your password",
+        "login": "Login",
+        "register": "Register",
+        "exit": "Exit",
+        "remember": "Remember me",
+        "remember_tooltip": "Remember IP and CDKey to skip login next time you connect to this server",
+      };
+      break;
   }
   var loginCallback = "gui_pw_auth_login"
   var registerCallback = "gui_pw_auth_register"
@@ -30,15 +50,18 @@ include nwn2-widget-lib.pug
   var panelSize = [340, 300]
   var panelPadding = 15
 
-  var flow = []
-  if(type == "login")
-    flow = ["ACCOUNT", "PASSWORD", "REMEMBER"]
-  else if(type == "register")
-    flow = ["ACCOUNT", "PASSWORD", "PASSWORDCONF"]
+  if(type == "login"){
+    var flow = ["ACCOUNT", "PASSWORD", "REMEMBER"]
+    var ok_action = "UIObject_Misc_ExecuteServerScript('" + loginCallback + "','login',local:42,local:44)"
+  }
+  else if(type == "register"){
+    var flow = ["ACCOUNT", "PASSWORD", "PASSWORDCONF"]
+    var ok_action = ("UIObject_Misc_ExecuteServerScript('" + registerCallback + "','register',local:42,local:43)")
+  }
   else
     throw "unknown GUI type: '" + type + "'"
 
-UIScene(name='SCREEN_PW_AUTH_' + type.toUpperCase() width='SCREEN_WIDTH' height='SCREEN_HEIGHT' scriptloadable='true' priority='SCENE_INGAME_FULLSCREEN' fullscreen='true' fadeout='0.0' fadein='0.0'
+UIScene(name='SCREEN_PW_AUTH_' + type.toUpperCase() width='SCREEN_WIDTH' height='SCREEN_HEIGHT' scriptloadable='true' priority='SCENE_INGAME_FULLSCREEN' fullscreen='true' fadeout='0.5' fadein='0.5' idleexpiretime=0.1
         backoutkey="true" OnBackout='UIButton_Input_ExitToMainMenu()')
 
 
@@ -47,9 +70,9 @@ UIScene(name='SCREEN_PW_AUTH_' + type.toUpperCase() width='SCREEN_WIDTH' height=
   UIPane(x=panelPadding y=0 width=panelSize[0] - 2* panelPadding height=panelSize[1] - panelPadding)
     //- inner content
     - let title = type == "login" ? loc["login"] : loc["register"]
-    UItext(text=title y="ALIGN_TOP" height=28 align="left" valign="middle" fontfamily="Title_Font" style='4')
+    UItext(text=title y="ALIGN_TOP" height=28 align="left" valign="middle" fontfamily="Title_Font" style='2')
     
-    UItext(name="SERVERNAME" y=30 height=42 align="center" valign="middle" fontfamily="Title_Font" style='4')
+    UItext(name="SERVERNAME" y=30 height=42 align="center" valign="middle" fontfamily="Title_Font" style='2')
     - let startY = 90
     - let spacing = 35
 
@@ -68,12 +91,14 @@ UIScene(name='SCREEN_PW_AUTH_' + type.toUpperCase() width='SCREEN_WIDTH' height=
           // Password
           +LabeledTextInput(name=f label=loc["password"] y=startY + spacing * i width=panelSize[0] - 2 * panelPadding variable="local:42" password="true"
                             prevcontrol=prev nextcontrol=next
-                            tooltip=loc["password_tooltip"])
+                            tooltip=loc["password_tooltip"]
+                            OnReturn=ok_action)
         when "PASSWORDCONF"
           // Password confirmation
           +LabeledTextInput(name=f label=loc["confirmpassword"] y=startY + spacing * i width=panelSize[0] - 2 * panelPadding variable="local:43" password="true"
                             prevcontrol=prev nextcontrol=next
-                            tooltip=loc["confirmpassword_tooltip"])
+                            tooltip=loc["confirmpassword_tooltip"]
+                            OnReturn=ok_action)
         when "REMEMBER"
           // Remember me
           UIPane(name="REMEMBER_PANE" y=startY + spacing * i width=panelSize[0] - 2 * panelPadding height=20)
@@ -86,12 +111,8 @@ UIScene(name='SCREEN_PW_AUTH_' + type.toUpperCase() width='SCREEN_WIDTH' height=
 
     // Buttons
     UIPane(x="ALIGN_CENTER" y="ALIGN_BOTTOM" height=30 width=panelSize[0] - 50)
-      if type == "login"
-        UIButton(name='OK_BUTTON' x='ALIGN_LEFT' y='ALIGN_BOTTOM' text=loc["login"] style='STYLE_SMALL_BUTTON' color='gold'
-                 OnLeftClick="UIObject_Misc_ExecuteServerScript('" + loginCallback + "','login',local:42,local:44)")
-      else if type == "register"
-        UIButton(name='OK_BUTTON' x='ALIGN_LEFT' y='ALIGN_BOTTOM' text=loc["register"] style='STYLE_SMALL_BUTTON' color='gold'
-                 OnLeftClick="UIObject_Misc_ExecuteServerScript('" + registerCallback + "','register',local:42,local:43)")  
+      UIButton(name='OK_BUTTON' x='ALIGN_LEFT' y='ALIGN_BOTTOM' text=(type == "login" ? loc["login"] : loc["register"]) style='STYLE_SMALL_BUTTON' color='gold'
+               OnLeftClick=ok_action)
       +CancelButton(x="ALIGN_RIGHT" y="ALIGN_BOTTOM" width=124 height=28 OnLeftClick='UIButton_Input_ExitToMainMenu()' text=loc["exit"])
 
 

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<UIScene name="SCREEN_PW_AUTH_REGISTER" width="SCREEN_WIDTH" height="SCREEN_HEIGHT" scriptloadable="true" priority="SCENE_INGAME_FULLSCREEN" fullscreen="true" fadeout="0.0" fadein="0.0" backoutkey="true" OnBackout="UIButton_Input_ExitToMainMenu()"></UIScene>
+<UIScene name="SCREEN_PW_AUTH_REGISTER" width="SCREEN_WIDTH" height="SCREEN_HEIGHT" scriptloadable="true" priority="SCENE_INGAME_FULLSCREEN" fullscreen="true" fadeout="0.5" fadein="0.5" idleexpiretime="0.1" backoutkey="true" OnBackout="UIButton_Input_ExitToMainMenu()"></UIScene>
 <UIPane width="371" height="338" capturemouseclicks="false" x="ALIGN_CENTER" y="ALIGN_CENTER">
   <UIPane x="15" y="23" width="340" height="300" capturemouseclicks="false">
     <UIPane x="15" y="0" width="310" height="285">
-      <UItext text="Register" y="ALIGN_TOP" height="28" align="left" valign="middle" fontfamily="Title_Font" style="4"></UItext>
-      <UItext name="SERVERNAME" y="30" height="42" align="center" valign="middle" fontfamily="Title_Font" style="4"></UItext>
+      <UItext text="Register" y="ALIGN_TOP" height="28" align="left" valign="middle" fontfamily="Title_Font" style="2"></UItext>
+      <UItext name="SERVERNAME" y="30" height="42" align="center" valign="middle" fontfamily="Title_Font" style="2"></UItext>
       <!-- Account-->
       <UIPane height="20" capturemouseclicks="false" y="90" width="310">
         <UIText width="80" height="PARENT_HEIGHT" ignoreevents="true" align="left" valign="middle" text="Account:"></UIText>
@@ -23,7 +23,7 @@
         <UIPane x="80" width="230" height="PARENT_HEIGHT" capturemouseclicks="false">
           <UIPane capturemouseclicks="false" width="230" height="20">
             <UIPane x="3" y="3" width="224" height="14" capturemouseclicks="false">
-              <UIText width="PARENT_WIDTH" height="PARENT_HEIGHT" align="center" valign="middle" fontfamily="International" multiline="false" maxlength="24" returnrestricted="true" editable="true" selectable="true" update="true" OnUpdate="UIObject_Misc_SetLocalVarString(local:42)" OnToolTip="UIObject_Tooltip_DisplayTooltipString(&quot;Your password for logging into this server. This is not related with any Bioware account password&quot;,OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_2,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)" name="PASSWORD" password="true" nextcontrol="PASSWORDCONF" allowpunc="true" allowspace="true"></UIText>
+              <UIText width="PARENT_WIDTH" height="PARENT_HEIGHT" align="center" valign="middle" fontfamily="International" multiline="false" maxlength="24" returnrestricted="true" editable="true" selectable="true" update="true" OnUpdate="UIObject_Misc_SetLocalVarString(local:42)" OnToolTip="UIObject_Tooltip_DisplayTooltipString(&quot;Your password for logging into this server. This is not related with any Bioware account password&quot;,OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_2,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)" name="PASSWORD" password="true" nextcontrol="PASSWORDCONF" OnReturn="UIObject_Misc_ExecuteServerScript('gui_pw_auth_register','register',local:42,local:43)" allowpunc="true" allowspace="true"></UIText>
             </UIPane>
             <UIFrame topleft="tp_frame_tl.tga" topright="tp_frame_tr.tga" bottomleft="tp_frame_bl.tga" bottomright="tp_frame_BR.tga" top="tp_frame_t.tga" bottom="tp_frame_b.tga" left="tp_frame_l.tga" right="tp_frame_r.tga" fillstyle="stretch" fill="tp_frame_bg.tga" border="5"></UIFrame>
           </UIPane>
@@ -35,7 +35,7 @@
         <UIPane x="80" width="230" height="PARENT_HEIGHT" capturemouseclicks="false">
           <UIPane capturemouseclicks="false" width="230" height="20">
             <UIPane x="3" y="3" width="224" height="14" capturemouseclicks="false">
-              <UIText width="PARENT_WIDTH" height="PARENT_HEIGHT" align="center" valign="middle" fontfamily="International" multiline="false" maxlength="24" returnrestricted="true" editable="true" selectable="true" update="true" OnUpdate="UIObject_Misc_SetLocalVarString(local:43)" OnToolTip="UIObject_Tooltip_DisplayTooltipString(&quot;Type again your password&quot;,OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_2,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)" name="PASSWORDCONF" password="true" prevcontrol="PASSWORD" nextcontrol="OK_BUTTON" allowpunc="true" allowspace="true"></UIText>
+              <UIText width="PARENT_WIDTH" height="PARENT_HEIGHT" align="center" valign="middle" fontfamily="International" multiline="false" maxlength="24" returnrestricted="true" editable="true" selectable="true" update="true" OnUpdate="UIObject_Misc_SetLocalVarString(local:43)" OnToolTip="UIObject_Tooltip_DisplayTooltipString(&quot;Type again your password&quot;,OBJECT_X,OBJECT_Y,SCREEN_TOOLTIP_2,ALIGN_NONE,ALIGN_NONE,0,0,ALIGN_LEFT)" name="PASSWORDCONF" password="true" prevcontrol="PASSWORD" nextcontrol="OK_BUTTON" OnReturn="UIObject_Misc_ExecuteServerScript('gui_pw_auth_register','register',local:42,local:43)" allowpunc="true" allowspace="true"></UIText>
             </UIPane>
             <UIFrame topleft="tp_frame_tl.tga" topright="tp_frame_tr.tga" bottomleft="tp_frame_bl.tga" bottomright="tp_frame_BR.tga" top="tp_frame_t.tga" bottom="tp_frame_b.tga" left="tp_frame_l.tga" right="tp_frame_r.tga" fillstyle="stretch" fill="tp_frame_bg.tga" border="5"></UIFrame>
           </UIPane>
@@ -43,7 +43,7 @@
       </UIPane>
       <!-- Buttons-->
       <UIPane x="ALIGN_CENTER" y="ALIGN_BOTTOM" height="30" width="290">
-        <UIButton name="OK_BUTTON" x="ALIGN_LEFT" y="ALIGN_BOTTOM" text="Register" style="STYLE_SMALL_BUTTON" color="gold" OnLeftClick="UIObject_Misc_ExecuteServerScript('gui_pw_auth_register','register',local:42,local:43)"> </UIButton>
+        <UIButton name="OK_BUTTON" x="ALIGN_LEFT" y="ALIGN_BOTTOM" text="Register" style="STYLE_SMALL_BUTTON" color="gold" OnLeftClick="UIObject_Misc_ExecuteServerScript('gui_pw_auth_register','register',local:42,local:43)"></UIButton>
         <UIButton MouseUpSFX="gui_button" released="b_lgr_normal.tga" released_hilighted="b_lgr_hover.tga" pressed="b_lgr_pressed.tga" pressed_hilighted="b_lgr_hover_pressed.tga" text="Exit" x="ALIGN_RIGHT" y="ALIGN_BOTTOM" width="124" height="28" OnLeftClick="UIButton_Input_ExitToMainMenu()">
           <UIText style="1" align="center" valign="middle" fontfamily="Title_Font"></UIText>
           <UIFrame state="up" fill="b_lgr_normal.tga"></UIFrame>

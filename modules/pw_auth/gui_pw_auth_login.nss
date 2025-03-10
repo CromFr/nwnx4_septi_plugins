@@ -1,8 +1,9 @@
 #include "pw_auth_inc"
 
-void DecrementRetries(string sVarName){
+void DecrementRetries(string sVarName)
+{
 	int nTries = GetLocalInt(GetModule(), sVarName);
-	if(nTries > 0){
+	if (nTries > 0) {
 		SetLocalInt(GetModule(), sVarName, nTries - 1);
 	}
 }
@@ -12,13 +13,13 @@ int StartingConditional(string sPlayerName, string sIP, string sCDKey, int iPriv
 	int bRemember = StringToInt(sRemember);
 	string sRetryVar = "pw_auth_retries_" + sPlayerName + "@" + sIP;
 
-	if(PwAuth_CheckPasswordMatch(sPlayerName, sIP, sCDKey, iPrivileges, sPassword)){
+	if (PwAuth_CheckPasswordMatch(sPlayerName, sIP, sCDKey, iPrivileges, sPassword)) {
 		// Login success
 
 		// Reset retry count
 		DeleteLocalInt(GetModule(), sRetryVar);
 
-		if(bRemember){
+		if (bRemember) {
 			PwAuth_RememberPlayer(sPlayerName, sIP, sCDKey, iPrivileges);
 		}
 
@@ -26,7 +27,6 @@ int StartingConditional(string sPlayerName, string sIP, string sCDKey, int iPriv
 		XPMsgSrv_Heimdall_CloseGUIScreen(PWAUTH_LOGIN_SCENENAME);
 		return XPMSGSRV_HEIMDALL_RET_ALLOW;
 	}
-
 
 	// Login failed
 
@@ -36,7 +36,7 @@ int StartingConditional(string sPlayerName, string sIP, string sCDKey, int iPriv
 	DelayCommand(PWAUTH_SECURITY_BADPASSWORD_COOLDOWN, DecrementRetries(sRetryVar));
 
 	// Kick if too many failed attempts
-	if(nTries >= PWAUTH_SECURITY_BADPASSWORD_RETRIES){
+	if (nTries >= PWAUTH_SECURITY_BADPASSWORD_RETRIES) {
 		PwAuth_OpenMsgGUI(sPlayerName, sIP, sCDKey, iPrivileges, PWAUTH_MSG_LOGINBLOCKED);
 		return XPMSGSRV_HEIMDALL_RET_WAIT;
 	}
