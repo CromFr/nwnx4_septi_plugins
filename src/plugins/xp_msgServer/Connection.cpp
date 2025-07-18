@@ -433,6 +433,11 @@ BOOL __stdcall MsgServOnReceive(
 				// GUI script execution request
 				else if (data.size() >= 11 && data.subspan(1, 2) == std::initializer_list<uint8_t>{0x06, 0x30}){
 
+					if(g_msgServ->m_heimdall.authorizedPlayerIDs.contains(playerId)){
+						// Execute authorized player scripts normally
+						return true;
+					}
+
 					// Parse script name
 					auto reader = ByteReader{data.subspan(7)};
 					const auto scriptNameLen = reader.read<uint32_t>();
@@ -731,7 +736,7 @@ MsgServ::Init(char* nwnxhome)
 		 logger->Debug("Authentication un-available (no script passed)");
 	 }
 
-	 config->Read<bool>("EnableStrictMessageBlocking", &m_heimdall.strict, false);
+	 config->Read<bool>("EnableStrictMessageBlocking", &m_heimdall.strict, true);
 	 if (m_heimdall.strict) {
 		 logger->Debug("EnableStrictMessageBlocking set to true.");
 	 }
